@@ -62,45 +62,25 @@ jobs:
     needs: [ deploy-via-sftp, install-dependencies ]
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    env:
-      # Discord Token
-      DISCORD_API_TOKEN: ${{ secrets.DISCORD_API_TOKEN }}
-      DISCORD_API_TOKEN_TEST: ${{ secrets.DISCORD_API_TOKEN_TEST }}
-      # MongoDB
-      REFER_DB: ${{ secrets.REFER_DB }}
-      # DBs
-      CARHUNT_DB: ${{ secrets.CARHUNT_DB }}
-      CLASH_DB: ${{ secrets.CLASH_DB }}
-      ELITE_DB: ${{ secrets.ELITE_DB }}
-      WEEKLY_DB: ${{ secrets.WEEKLY_DB }}
-      CAR_LIST_DB: ${{ secrets.CAR_LIST_DB }}
-      # Channels
-      FEEDBACK_LOG_CHANNEL: ${{ secrets.FEEDBACK_LOG_CHANNEL }}
-      SUGGESTION_CHANNEL: ${{ secrets.SUGGESTION_CHANNEL }}
-      # Webhooks
-      ERROR_LOG_WH: ${{ secrets.ERROR_LOG_WH }}
-      FEEDBACK_WH: ${{ secrets.FEEDBACK_WH }}
-      LOG_WH: ${{ secrets.LOG_WH }}
-
     steps:
       - id: add-secret-variables
         uses: fifsky/ssh-action@master
         with:
           command: |
             cd ./venv/${{ env.REPO_NAME }}
-            echo ${{ env.DISCORD_API_TOKEN }} > .env
-            echo ${{ env.DISCORD_API_TOKEN_TEST }} >> .env
-            echo ${{ env.REFER_DB }} >> .env
-            echo ${{ env.CARHUNT_DB }} >> .env
-            echo ${{ env.CLASH_DB }} >> .env
-            echo ${{ env.ELITE_DB }} >> .env
-            echo ${{ env.WEEKLY_DB }} >> .env
-            echo ${{ env.CAR_LIST_DB }} >> .env
-            echo ${{ env.FEEDBACK_LOG_CHANNEL }} >> .env
-            echo ${{ env.SUGGESTION_CHANNEL }} >> .env
-            echo ${{ env.ERROR_LOG_WH }} >> .env
-            echo ${{ env.FEEDBACK_WH }} >> .env
-            echo ${{ env.LOG_WH }} >> .env
+            echo "DISCORD_API_TOKEN=${{ secrets.DISCORD_API_TOKEN }}" > .env
+            echo "DISCORD_API_TOKEN_TEST=${{ secrets.DISCORD_API_TOKEN_TEST }}" >> .env
+            echo "REFER_DB=${{ secrets.REFER_DB }}" >> .env
+            echo "CARHUNT_DB${{ secrets.CARHUNT_DB }}" >> .env
+            echo "CLASH_DB=${{ secrets.CLASH_DB }}" >> .env
+            echo "ELITE_DB=${{ secrets.ELITE_DB }}" >> .env
+            echo "WEEKLY_DB=${{ secrets.WEEKLY_DB }}" >> .env
+            echo "CAR_LIST_DB=${{ secrets.CAR_LIST_DB }}" >> .env
+            echo "FEEDBACK_LOG_CHANNEL=${{ secrets.FEEDBACK_LOG_CHANNEL }}" >> .env
+            echo "SUGGESTION_CHANNEL=${{ secrets.SUGGESTION_CHANNEL }}" >> .env
+            echo "ERROR_LOG_WH=${{ secrets.ERROR_LOG_WH }}" >> .env
+            echo "FEEDBACK_WH=${{ secrets.FEEDBACK_WH }}" >> .env
+            echo "LOG_WH=${{ secrets.LOG_WH }}" >> .env
             echo $?
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
