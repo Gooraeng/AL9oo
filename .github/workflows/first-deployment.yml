@@ -41,7 +41,6 @@ jobs:
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           args: "-tt"
-          args: "-tt"
 
   deploy-via-sftp:
     needs: [install-dependencies]
