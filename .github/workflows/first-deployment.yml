@@ -115,7 +115,7 @@ jobs:
         with:
           # Make sure ExecStart=, WorkingDirectory= and chmod +x point to the same directory. These may be unique to your code setup
           command: |
-            echo "[Unit]
+            sudo bash -c 'echo "[Unit]
             Description=${{ env.REPO_NAME }} Discord Bot
             After=multi-user.target
             [Service]
@@ -130,7 +130,7 @@ jobs:
             chmod +x ./venv/${{ env.REPO_NAME }}/launcher.py
             sudo systemctl enable ${{ env.REPO_NAME }}.service
             sudo systemctl daemon-reload
-            sudo systemctl start ${{ env.REPO_NAME }}.service
+            sudo systemctl start ${{ env.REPO_NAME }}.service'
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
