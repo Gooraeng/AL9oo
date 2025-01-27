@@ -14,7 +14,7 @@ jobs:
         with:
           # install the libraries required for your bot
           command: |
-            python -m venv venv
+            python3 -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: SFTPDeploy
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.1
+        uses: wlixcc/SFTP-Deploy-Action@master
         with:
           username: ${{ env.VPS_USER }}
           server: ${{ env.VPS_IP }}
@@ -70,6 +70,18 @@ jobs:
           command: |
             cd ${{ env.REPO_NAME }}
             echo ${{ env.DISCORD_API_TOKEN }} > .env
+            echo ${{ env.DISCORD_API_TOKEN_TEST }} >> .env
+            echo ${{ env.REFER_DB }} >> .env
+            echo ${{ env.CARHUNT_DB }} >> .env
+            echo ${{ env.CLASH_DB }} >> .env
+            echo ${{ env.ELITE_DB }} >> .env
+            echo ${{ env.WEEKLY_DB }} >> .env
+            echo ${{ env.CAR_LIST_DB }} >> .env
+            echo ${{ env.FEEDBACK_LOG_CHANNEL }} >> .env
+            echo ${{ env.SUGGESTION_CHANNEL }} >> .env
+            echo ${{ env.ERROR_LOG_WH }} >> .env
+            echo ${{ env.FEEDBACK_WH }} >> .env
+            echo ${{ env.LOG_WH }} >> .env
             echo $?
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
