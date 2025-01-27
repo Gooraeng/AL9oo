@@ -59,7 +59,7 @@ jobs:
           sftpargs: '-o ConnectTimeout=5'
   
   add-secret-variables:
-    needs: [ deploy-via-sftp ]
+    needs: [ deploy-via-sftp, install-dependencies ]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     env:
@@ -120,14 +120,14 @@ jobs:
             After=multi-user.target
             [Service]
             Type=simple
-            ExecStart=/usr/bin/python3 /venv/${{ env.REPO_NAME }}/launcher.py
+            ExecStart=./venv/bin/python3 ./venv/${{ env.REPO_NAME }}/launcher.py
             User=${{ env.VPS_USER }}
             Restart=on-failure
             RestartSec=30
-            WorkingDirectory=/venv/${{ env.REPO_NAME }}/
+            WorkingDirectory=./venv/${{ env.REPO_NAME }}/
             [Install]
             WantedBy=multi-user.target" >> /etc/systemd/system/${{ env.REPO_NAME }}.service
-            chmod +x /venv/${{ env.REPO_NAME }}/launcher.py
+            chmod +x ./venv/${{ env.REPO_NAME }}/launcher.py
             sudo systemctl enable ${{ env.REPO_NAME }}.service
             sudo systemctl daemon-reload
             sudo systemctl start ${{ env.REPO_NAME }}.service
