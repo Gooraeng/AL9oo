@@ -26,21 +26,24 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
   deploy-via-sftp:
+    needs: [install-dependencies]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - id: SFTPDeploy
-        uses: wlixcc/SFTP-Deploy-Action@master
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Deploy to Server
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           username: ${{ env.VPS_USER }}
           server: ${{ env.VPS_IP }}
           port: 22
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PRIVATE_KEY }}
           # clones entire github repo
           local_path: ./*
           # destination of the code on the server
           remote_path: /venv/${{ env.REPO_NAME }}/
-          args: '-o ConnectTimeout=5'
+          sftpargs: '-o ConnectTimeout=5'
   
   add-secret-variables:
     needs: [ deploy-via-sftp ]
