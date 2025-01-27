@@ -6,20 +6,7 @@ env:
   VPS_IP: ${{ secrets.VPS_IP }}
   VPS_USER: ${{ secrets.VPS_USER }}
 jobs:
-  setup-venv:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setting up venv
-        uses: actions/setup-python@v4
-        with:
-          command: |
-            apt install python3-venv
-            python -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-
   install-dependencies:
-    needs: [ setup-venv ]
     runs-on: ubuntu-latest
     steps:
       - name: Installing requirements for ${{ env.REPO_NAME }}
@@ -28,6 +15,9 @@ jobs:
           # install the libraries required for your bot
           # setup venv and then install the requirements
           command: |
+            apt install python3-venv
+            python -m venv venv
+            source venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
           host: ${{ env.VPS_IP }}
@@ -35,7 +25,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
   deploy-via-sftp:
-    needs: [ setup-venv ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -49,7 +38,7 @@ jobs:
           # clones entire github repo
           local_path: ./*
           # destination of the code on the server
-          remote_path: /root/${{ env.REPO_NAME }}/
+          remote_path: /venv/${{ env.REPO_NAME }}/
           args: '-o ConnectTimeout=5'
   
   add-secret-variables:
@@ -114,14 +103,14 @@ jobs:
             After=multi-user.target
             [Service]
             Type=simple
-            ExecStart=/usr/bin/python3 /root/${{ env.REPO_NAME }}/launcher.py
-            User=root
+            ExecStart=/usr/bin/python3 /venv/${{ env.REPO_NAME }}/launcher.py
+            User=${{ env.VPS_USER }}
             Restart=on-failure
             RestartSec=30
-            WorkingDirectory=/root/${{ env.REPO_NAME }}/
+            WorkingDirectory=/venv/${{ env.REPO_NAME }}/
             [Install]
             WantedBy=multi-user.target" >> /etc/systemd/system/${{ env.REPO_NAME }}.service
-            chmod +x /root/${{ env.REPO_NAME }}/launcher.py
+            chmod +x /venv/${{ env.REPO_NAME }}/launcher.py
             sudo systemctl enable ${{ env.REPO_NAME }}.service
             sudo systemctl daemon-reload
             sudo systemctl start ${{ env.REPO_NAME }}.service
