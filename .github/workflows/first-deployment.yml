@@ -6,6 +6,7 @@ env:
   VPS_IP: ${{ secrets.VPS_IP }}
   VPS_USER: ${{ secrets.VPS_USER }}
 jobs:
+  
   install-dependencies:
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +38,7 @@ jobs:
           username: ${{ env.VPS_USER }}
           server: ${{ env.VPS_IP }}
           port: 22
-          password: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           # clones entire github repo
           local_path: ./*
           # destination of the code on the server
