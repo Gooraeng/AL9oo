@@ -4,7 +4,6 @@ from cogs import error
 from collections import defaultdict
 from datetime import datetime
 from discord import (
-    CustomActivity, 
     ForumChannel,
     Interaction,
     Status, 
@@ -72,7 +71,6 @@ class Al9oo(commands.AutoShardedBot):
             heartbeat_timeout=60.0,
             chunk_guild_at_startup=False,
             intents=intents,
-            activity=CustomActivity(name='Listening /help'),
             status=Status.online
         )
         
