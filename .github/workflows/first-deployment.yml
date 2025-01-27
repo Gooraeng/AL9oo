@@ -26,7 +26,6 @@ jobs:
           args: "-tt"
 
   deploy-via-sftp:
-    needs: [install-dependencies]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
