@@ -6,8 +6,23 @@ env:
   VPS_IP: ${{ secrets.VPS_IP }}
   VPS_USER: ${{ secrets.VPS_USER }}
 jobs:
+  setup-venv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Installing venv
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install --upgrade pip
+          host: ${{ env.VPS_IP }}
+          user: ${{ env.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          args: "-tt"
   
   install-dependencies:
+    needs: [setup-venv]
     runs-on: ubuntu-latest
     steps:
       - name: Installing requirements for ${{ env.REPO_NAME }}
@@ -16,9 +31,6 @@ jobs:
           # install the libraries required for your bot
           # setup venv and then install the requirements
           command: |
-            python -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
             cd ./venv/${{ env.REPO_NAME }}
             pip install -U -r requirements.txt
           host: ${{ env.VPS_IP }}
@@ -27,6 +39,7 @@ jobs:
           args: "-tt"
 
   deploy-via-sftp:
+    needs: [setup-venv]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
