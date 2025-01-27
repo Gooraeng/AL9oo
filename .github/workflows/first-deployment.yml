@@ -6,7 +6,22 @@ env:
   VPS_IP: ${{ secrets.VPS_IP }}
   VPS_USER: ${{ secrets.VPS_USER }}
 jobs:
+  setup-venv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup venv
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            sudo apt install python3-venv
+            python -m venv venv
+          host: ${{ env.VPS_IP }}
+          user: ${{ env.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          args: "-tt"
+
   install-dependencies:
+    needs: [setup-venv]
     runs-on: ubuntu-latest
     steps:
       - name: Installing requirements for ${{ env.REPO_NAME }}
@@ -21,9 +36,11 @@ jobs:
             pip install --upgrade pip
             cd venv/${{ env.REPO_NAME }}
             pip install -U -r requirements.txt
+            pip install -U -r requirements.txt
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          args: "-tt"
           args: "-tt"
 
   deploy-via-sftp:
