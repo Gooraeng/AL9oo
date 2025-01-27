@@ -143,14 +143,14 @@ jobs:
         uses: fifsky/ssh-action@master
         with:
           command: |
-            echo "[Unit]
+            sudo bash -c 'echo "[Unit]
             Description=${{ env.REPO_NAME }} Discord Bot restart
             After=multi-user.target
             [Service]
             Type=oneshot
             ExecStart=/usr/bin/systemctl restart ${{ env.REPO_NAME }}.service
             [Install]
-            WantedBy=multi-user.target" >> /etc/systemd/system/${{ env.REPO_NAME }}-watcher.service
+            WantedBy=multi-user.target" >> /etc/systemd/system/${{ env.REPO_NAME }}-watcher.service'
             sudo systemctl enable ${{ env.REPO_NAME }}-watcher.service
             sudo systemctl daemon-reload
             sudo systemctl start ${{ env.REPO_NAME }}-watcher.service
