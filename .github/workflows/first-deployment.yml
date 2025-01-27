@@ -14,7 +14,6 @@ jobs:
         with:
           command: |
             python3 -m venv venv
-            pip install --upgrade pip
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -31,6 +30,7 @@ jobs:
           # setup venv and then install the requirements
           command: |
             source venv/bin/activate
+            pip install --upgrade pip
             cd ./venv/${{ env.REPO_NAME }}
             pip install -U -r requirements.txt
           host: ${{ env.VPS_IP }}
