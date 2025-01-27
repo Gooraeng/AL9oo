@@ -11,15 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: SFTP Deploy
-        uses: wlixcc/SFTP-Deploy-Action@master
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           username: ${{ secrets.VPS_USER }}
           server: ${{ secrets.VPS_IP }}
           port: 22
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           local_path: ./*
-          remote_path: /venv/${{ env.REPO_NAME }}/
-          args: '-o ConnectTimeout=5'
+          remote_path: ./venv/${{ env.REPO_NAME }}/
+          sftpargs: '-o ConnectTimeout=5'
 
   restart-bot:
     needs: [deploy-via-sftp]
