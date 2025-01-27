@@ -1,7 +1,6 @@
 aiofiles
 aiohttp<=3.9.5
 beautifulsoup4
-bson
 click
 discord.py
 git+https://github.com/Rapptz/discord-ext-menus

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from al9oo import Al9oo
-from config import refer_db, verify_env_vars
+from config import refer_db
 from logging.handlers import RotatingFileHandler
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.exception import LoadingFailedMongoDrive
@@ -41,7 +41,6 @@ async def main(is_dev : bool = False):
     
     try:
         log.info("LOADING ENVIRONMENT VARIABLES")
-        verify_env_vars()
     except ValueError as e:
         log.exception('Every Environment Variable is not set. Exiting.', exc_info=e)
         raise KeyboardInterrupt

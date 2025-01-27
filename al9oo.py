@@ -28,6 +28,7 @@ import pathlib
 __all__ = (
     "Al9oo",
 )
+
 initial_extensions = (
     'cogs.admin',
     'cogs.error',

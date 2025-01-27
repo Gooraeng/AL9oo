@@ -80,30 +80,3 @@ class Config:
     @check_logger.before_loop
     async def _ready(self):
         await self.app.wait_until_ready()
-
- 
-def verify_env_vars():
-    required_envs = {
-        'DISCORD_API_TOKEN': discord_api_token,
-        'REFER_DB': refer_db,
-        'CARHUNT_DB': carhunt_db,
-        'CLASH_DB': clash_db,
-        'ELITE_DB': elite_db,
-        'WEEKLY_DB': weekly_db,
-        'CAR_LIST_DB': car_list_db,
-        'LOG_WH': lwh,
-        'FEEDBACK_WH': fwh,
-        'ERROR_LOG_WH': elwh,
-        'FEEDBACK_LOG_CHANNEL': feedback_log_channel,
-        'SUGGESTION_CHANNEL': suggestion_channel,
-    
-    }
-    
-    MISSING_ENVS = []
-    for key, value in required_envs.items():
-        if not value:
-            MISSING_ENVS.append(key)
-            
-    if MISSING_ENVS:
-        missing_keys = "\n".join(MISSING_ENVS)
-        raise ValueError(f"Missing Environment Variable(s)\n{missing_keys}")
