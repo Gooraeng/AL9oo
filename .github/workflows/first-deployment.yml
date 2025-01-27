@@ -15,16 +15,16 @@ jobs:
           # install the libraries required for your bot
           # setup venv and then install the requirements
           command: |
-            apt install python3-venv
+            sudo apt install python3-venv
             python -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
             cd venv/${{ env.REPO_NAME }}
-            pip install -r requirements.txt
+            pip install -U -r requirements.txt
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          args: "-tt -vvv"
+          args: "-tt"
 
   deploy-via-sftp:
     needs: [install-dependencies]
