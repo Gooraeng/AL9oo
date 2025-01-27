@@ -19,7 +19,7 @@ jobs:
             python -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
-            cd venv/${{ env.REPO_NAME }}
+            cd ./venv/${{ env.REPO_NAME }}
             pip install -U -r requirements.txt
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
@@ -42,7 +42,7 @@ jobs:
           # clones entire github repo
           local_path: ./*
           # destination of the code on the server
-          remote_path: /venv/${{ env.REPO_NAME }}/
+          remote_path: ./venv/${{ env.REPO_NAME }}/
           sftpargs: '-o ConnectTimeout=5'
   
   add-secret-variables:
