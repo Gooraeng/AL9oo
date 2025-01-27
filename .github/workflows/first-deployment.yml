@@ -13,7 +13,10 @@ jobs:
         uses: fifsky/ssh-action@master
         with:
           command: |
+            rm -rf venv
             python3 -m venv venv
+            cd venv
+            mkdir ${{ env.REPO_NAME }}
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -31,7 +34,6 @@ jobs:
           command: |
             source venv/bin/activate
             pip install --upgrade pip
-            cd ./venv/${{ env.REPO_NAME }}
             pip install -U -r requirements.txt
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
