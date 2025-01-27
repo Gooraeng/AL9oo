@@ -23,7 +23,7 @@ jobs:
           args: "-tt"
   
   install-dependencies:
-    needs: [setup-venv]
+    needs: [deploy-via-sftp]
     runs-on: ubuntu-latest
     steps:
       - name: Installing requirements for ${{ env.REPO_NAME }}
@@ -34,7 +34,7 @@ jobs:
           command: |
             source venv/bin/activate
             pip install --upgrade pip
-            pip install -U -r requirements.txt
+            pip install -U -r ./venv/${{ env.REPO_NAME }}/requirements.txt
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
