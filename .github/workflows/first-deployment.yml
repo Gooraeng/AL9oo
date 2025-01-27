@@ -19,6 +19,7 @@ jobs:
             python -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
+            cd venv/${{ env.REPO_NAME }}
             pip install -r requirements.txt
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
