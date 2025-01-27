@@ -1,0 +1,17 @@
+aiofiles
+aiohttp<=3.9.5
+beautifulsoup4
+bson
+click
+discord.py
+git+https://github.com/Rapptz/discord-ext-menus
+lxml
+motor
+numpy
+pandas
+psutil
+pydantic
+python-dotenv
+rapidfuzz
+typing
+typing_extensions

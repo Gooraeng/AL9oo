@@ -1,0 +1,28 @@
+.pybuilder/
+__pycache__/
+
+# related to env / venv
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.vscode/
+SECURITY.md
+
+# related to AL9oo
+secrets/
+temp_cog/
+*.py[cod]
+icons/
+target/
+test.py
+temp.py
+data/
+project-files/
+
+# related to PyCharm
+*.iml
+.idea/
