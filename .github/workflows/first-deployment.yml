@@ -130,7 +130,7 @@ jobs:
             chmod +x ./venv/${{ env.REPO_NAME }}/launcher.py
             sudo systemctl enable ${{ env.REPO_NAME }}.service
             sudo systemctl daemon-reload
-            sudo systemctl start ${{ env.REPO_NAME }}.service'
+            sudo systemctl start ${{ env.REPO_NAME }}.service
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
