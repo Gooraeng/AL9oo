@@ -24,6 +24,7 @@ jobs:
           host: ${{ env.VPS_IP }}
           user: ${{ env.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          args: "-tt -vvv"
 
   deploy-via-sftp:
     needs: [install-dependencies]
