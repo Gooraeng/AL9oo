@@ -73,7 +73,7 @@ jobs:
             echo "DISCORD_API_TOKEN=${{ secrets.DISCORD_API_TOKEN }}" > .env
             echo "DISCORD_API_TOKEN_TEST=${{ secrets.DISCORD_API_TOKEN_TEST }}" >> .env
             echo "REFER_DB=${{ secrets.REFER_DB }}" >> .env
-            echo "CARHUNT_DB${{ secrets.CARHUNT_DB }}" >> .env
+            echo "CARHUNT_DB=${{ secrets.CARHUNT_DB }}" >> .env
             echo "CLASH_DB=${{ secrets.CLASH_DB }}" >> .env
             echo "ELITE_DB=${{ secrets.ELITE_DB }}" >> .env
             echo "WEEKLY_DB=${{ secrets.WEEKLY_DB }}" >> .env
