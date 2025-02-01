@@ -26,11 +26,11 @@ class FeedbackProblemModal(ui.Modal):
         title : Optional[str] = None,
         *,
         user_input : Optional[str] = None,
-        bot : Optional[Al9oo] = None,
+        app : Optional[Al9oo] = None,
         view : Optional[FeedbackViewBase] = None,
         failed_feedback : bool = False
     ) -> None:
-        self.app = bot
+        self.app = app
         self.failed_feedback = failed_feedback
         self.user_input = user_input
         self.view = view
@@ -80,11 +80,16 @@ class FeedbackProblemModal(ui.Modal):
             ),
             color=failed
         )
-        await self.app.err_handler.send_error(interaction, embed=embed, error=error)
+        await self.app.err_handler.send_error(interaction, embed=embed, error=error, do_report=True)
 
 
 class FeedbackViewBase(BaseView):
-    def __init__(self, app: Al9oo, user_id : Optional[int] = None, modal_responses : Optional[ModalResponse] = None):
+    def __init__(
+        self,
+        app: Al9oo,
+        user_id : Optional[int] = None,
+        modal_responses : Optional[ModalResponse] = None
+    ):
         super().__init__(app=app, timeout=None)
         self.user_id = user_id
         self.modal_responses : Optional[ModalResponse] = modal_responses
@@ -111,7 +116,7 @@ class FeedbackViewBase(BaseView):
             return
         
         for item in self.children:
-            assert item.type == discord.ComponentType.button
+            assert isinstance(item, discord.ui.Button)
             label = re.sub(r'\s+', '', item.label)
             item.custom_id = f'{self.__class__.__name__}:{label}:{user_id}'
     
@@ -134,7 +139,7 @@ class FeedbackViewBase(BaseView):
         return self
     
     async def rebind(self, interaction : discord.Interaction):
-        pass
+        raise NotImplementedError
     
     async def on_error(self, interaction: discord.Interaction, error: Exception, item: ui.Item[Any]) -> None:
         return await super().on_error(interaction, error, item)
@@ -152,11 +157,11 @@ class FeedbackFailedView(FeedbackViewBase):
         self,
         responses : Optional[ModalResponse] = None,
         *,
-        bot : Al9oo,
+        app : Al9oo,
         user_id : Optional[int] = None,
         instruction : Optional[str] = None
     ):
-        super().__init__(bot=bot, user_id=user_id)
+        super().__init__(app=app, user_id=user_id)
         self.adjust_buttons(True)
         self.modal_responses = responses 
         self.__modal = FeedbackProblemModal(
@@ -271,7 +276,7 @@ class FeedbackView(FeedbackViewBase):
     
     async def spawn_modal(self, interaction : discord.Interaction, modal_title : str):
         self.clear_items()
-        modal = FeedbackProblemModal(modal_title, view=self, bot=self.app)
+        modal = FeedbackProblemModal(modal_title, view=self, app=self.app)
         await interaction.response.send_modal(modal)
     
     @ui.button(label='Bug Report', style=discord.ButtonStyle.danger, emoji=discord.PartialEmoji(name='\N{BUG}'))
@@ -294,7 +299,7 @@ class FeedbackView(FeedbackViewBase):
             title,
             user_input=detail,
             view=self,
-            bot=self.app
+            app=self.app
         )
         await interaction.response.send_modal(modal)
     
@@ -389,11 +394,13 @@ class FeedbackReplyView(ui.View):
         
     @ui.button(label='Send')
     async def send(self, interaction : discord.Interaction, _):
-        self.embed.set_footer(text=inspect.cleandoc(
+        text = inspect.cleandoc(
             """
             Replying to this message, or DMing the bot, will not send the message to the AL9oo Team.
             If you need further assistance, please consider to visit AL9oo Support server.
-            """))
+            """
+        )
+        self.embed.set_footer(text=text)
 
         invite = InviteLinkView('Click Here')
         

@@ -120,7 +120,7 @@ class Feedback(commands.Cog):
             """
         )
         embed.description = f"I'm sorry. I tried hard to send your feedback, but, ultimately failed.\n[Reason] {reason}\nAlternatively, {instruction}"
-        other_view = FeedbackFailedView(response, bot=self.app, user_id=interaction.user.id)
+        other_view = FeedbackFailedView(response, app=self.app, user_id=interaction.user.id)
         await interaction.edit_original_response(view=other_view, embed=embed)     
 
     @app_commands.command(
@@ -135,7 +135,7 @@ class Feedback(commands.Cog):
         await interaction.response.defer(thinking=True, ephemeral=True)
 
         retry_after = interaction.created_at + timedelta(seconds=default_cooldown)
-        view = FeedbackView(interaction.user.id, bot=self.app, delete_time=retry_after, cooldownMapping=self.cd)
+        view = FeedbackView(interaction.user.id, app=self.app, delete_time=retry_after, cooldownMapping=self.cd)
         
         embed = view.load_warning_embed(True)
         embed.description += '\n### Plus, you are allowed to submit up to 2 feedbacks in 5 minutes.'
@@ -164,20 +164,23 @@ class Feedback(commands.Cog):
         embeds_list : list[NumberedObject] = []
         
         for j in feedbacks:
+            created_at_formatted = format_dt(datetime.fromtimestamp(j.created_at), 'F')
             embed = Embed(
                 title=f"[{j.type}] FEEDBACK",
-                description=f'{j.detail}\n\nCreated at : {format_dt(datetime.fromtimestamp(j.created_at), 'F')}',
+                description=f'{j.detail}\n\nCreated at : {created_at_formatted}',
                 color=interaction_with_server,
             )
             
             num = 1
             author_info = j.author_info
+
             if author_info.guild:
                 embed.add_field(name=f'{num}. Guild', value=f'* name : {author_info.guild.name}\n* id : {author_info.guild.id}')
                 num += 1
             if author_info.channel:
                 embed.add_field(name=f"{num}. Channel", value=f'* name : {author_info.channel.name}\n* id : {author_info.channel.id}')
                 num += 1
+
             embed.add_field(name=f"{num}. Author", value=f'* name : {author_info.author.name}\n* id : {author_info.author.id}')
             embeds_list.append(NumberedObject(_id=j.id, object=embed))
         
