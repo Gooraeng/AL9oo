@@ -298,7 +298,7 @@ class Utils(commands.Cog):
             color=al9oo_point,
             url='https://discord.gg/8dpAFYXk8s'
         )
-        view = InviteLinkView(url="AL9oo Support Server")
+        view = InviteLinkView(label="AL9oo Support Server")
         await interaction.response.send_message(embed=embed, view=view)
 
     @app_commands.command(description="Are you interested in my source?")
