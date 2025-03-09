@@ -1,7 +1,13 @@
 from __future__ import annotations
 from bson import ObjectId
 from dataclasses import dataclass
-from typing import List, Literal, NamedTuple, Optional, TypedDict, Union
+from typing import (
+    List,
+    Literal,
+    NamedTuple,
+    Optional,
+    Union
+)
 from pydantic import BaseModel, Field, field_validator
 
 import datetime
@@ -9,35 +15,24 @@ import discord
 
 
 ReferenceTypes = Literal['Car Hunt Riot', 'Club Clash', 'Elite', 'Weekly Competition']
-SearchTypes = Literal['CAR', 'CLASS', 'MAP']
-FollowList = Literal["AL9oo Main Announcement", "AL9oo Urgent Alert", "ALU Release note"]
 
 CommandExecutableGuildChannel = Union[discord.abc.GuildChannel, discord.Thread]
 CommandExecutableAllChannel = Union[CommandExecutableGuildChannel, discord.DMChannel]
-WebhookMessagableChannel = Union[discord.ForumChannel, discord.TextChannel, discord.StageChannel, discord.VoiceChannel]
+WebhookMessagableChannel = Union[discord.TextChannel, discord.VoiceChannel, discord.StageChannel, discord.ForumChannel]
 
 Embeds = List[discord.Embed]
 
 
-class FollowWebhookModel(TypedDict):
-    webhook : discord.Webhook
-    source_ch : discord.TextChannel
-
-
-class FollowFailedStatus(NamedTuple):
-    target : discord.TextChannel
-    reason : str
-
-
-class FollowResult(NamedTuple):
-    done : list[discord.TextChannel]
-    failed : list[FollowFailedStatus]
-    embed : discord.Embed
-
-
 class ModalResponse(NamedTuple):
     title : str
-    detail : Optional[str] 
+    detail : Optional[str]
+
+
+class DetailByField(NamedTuple):
+    field : str
+    user_search : str
+    suggestion : str
+    exact : bool
 
 
 class CommandDetails(NamedTuple):
@@ -166,6 +161,3 @@ class ReferenceInfo(CarInfo):
     track : str
     record : str
     link : str
-
-
-

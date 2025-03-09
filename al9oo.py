@@ -1,21 +1,17 @@
 from __future__ import annotations
 from aiohttp import ClientSession
 from cogs import error
+from config import *
 from collections import defaultdict
 from datetime import datetime
 from discord import (
     ForumChannel,
-    Interaction,
-    Status, 
-    TextChannel,
-    ui,
+    Status,
 )
 from discord.ext import commands
 from discord.utils import utcnow
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Any, Optional
-from config import *
-from utils.embed_color import *
 from utils.models import CommandExecutableGuildChannel, WebhookMessagableChannel
 
 import asyncio
@@ -31,29 +27,14 @@ __all__ = (
 initial_extensions = (
     'cogs.admin',
     'cogs.error',
-    'cogs.eventHandler',
+    'cogs.event',
     'cogs.feedback',
-    'cogs.follow',
+    'cogs.history',
     'cogs.reference',
-    'cogs.patchnote',
     'cogs.utils',
 )
 current_path = pathlib.Path(__file__).resolve()
 
-
-class GuildJoinView(ui.View):
-    """View Class for when AL9oo Joins Guilds."""
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @ui.button(label="Delete", style=discord.ButtonStyle.danger, custom_id="deleteall")
-    async def delete_button(self, interaction : Interaction, button : discord.Button):
-        await interaction.response.defer()
-        await interaction.delete_original_response()
-
-    
-    async def on_error(self, interaction: Interaction, error: Exception, item: ui.Item[Any]) -> None:
-        await interaction.response.send_message("Sorry There's something error", ephemeral=True)
 
     
 class Al9oo(commands.AutoShardedBot):
@@ -95,16 +76,8 @@ class Al9oo(commands.AutoShardedBot):
         try:
             self._feedback_channel = self.get_channel(int(feedback_log_channel)) or await self.fetch_channel(int(feedback_log_channel))
             self._suggestion_channel = self.get_channel(int(suggestion_channel)) or await self.fetch_channel(int(suggestion_channel))
-            self._al9oo_main_announcement = self.get_channel(al9oo_main_announcement) or await self.fetch_channel(al9oo_main_announcement)
-            self._al9oo_urgent_alert = self.get_channel(al9oo_urgent_alert) or await self.fetch_channel(al9oo_urgent_alert)
-            self._arn_channel = self.get_channel(arn_channel) or await self.fetch_channel(arn_channel)
-        
         except:
             pass
-        
-    def add_views(self):
-        """Use for Views persistent."""
-        self.add_view(GuildJoinView())
         
     async def setup_hook(self) -> None:        
         self.load_mongo_drivers()
@@ -122,9 +95,6 @@ class Al9oo(commands.AutoShardedBot):
                 
             except Exception as e:
                 self.logger.error('%s 로딩 실패\n', extension, exc_info=e)
-
-        await self.tree.sync()
-        self.add_views()
 
     # Bot events
     async def on_ready(self):
@@ -198,18 +168,6 @@ class Al9oo(commands.AutoShardedBot):
     @property
     def suggestion_channel(self) -> ForumChannel:
         return self._suggestion_channel
-    
-    @property
-    def arn_channel(self) -> TextChannel:
-        return self._arn_channel
-    
-    @property
-    def al9oo_urgent_alert(self) -> TextChannel:
-        return self._al9oo_urgent_alert
-    
-    @property
-    def al9oo_main_announcement(self) -> TextChannel:
-        return self._al9oo_main_announcement
     
     @property
     def err_handler(self) -> Optional[error.AppCommandErrorHandler]:
