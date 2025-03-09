@@ -4,7 +4,8 @@ from aiohttp import ClientSession
 from config import clash_db, carhunt_db, elite_db, weekly_db, car_list_db
 from pathlib import Path
 from typing import Any, List, Optional
-from utils.models import CarInfo, ReferenceInfo
+from .models import CarInfo, ReferenceInfo
+from .exception import DownloadFailed
 
 import aiofiles
 import csv
@@ -22,7 +23,6 @@ current_path = Path(__file__).resolve()
 db_folder = current_path.parent.parent / 'data'
 
 log = logging.getLogger(__name__)
-
 
 
 dbs = [
@@ -85,14 +85,14 @@ class CsvDataBaseManager(Manager):
     def _resolve_path(self):
         return db_folder / f'{self._name}_db.csv'
 
-    async def _download(self):
+    async def _download(self) -> str:
         try:
             async with self._session.get(self._url) as response:
                 response.raise_for_status()
                 return await response.text() 
         
         except Exception as e:
-            raise e
+            raise DownloadFailed(self.name) from e
         
         finally:
             if self._session_was_none:
@@ -202,9 +202,9 @@ class CarListManager(CsvDataBaseManager):
             return self.name, []
 
 
-def get_references(session : Optional[ClientSession] = None) :
-    return [ReferenceManager(db, url, session) for url, db in dbs]
+def get_references() :
+    return [ReferenceManager(db, url) for url, db in dbs]
 
 
-def get_car_list(session : Optional[ClientSession] = None) :
-    return CarListManager('car_list', car_list_db, session)
+def get_car_list() :
+    return CarListManager('car_list', car_list_db)
