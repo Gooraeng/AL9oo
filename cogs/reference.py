@@ -1,15 +1,11 @@
 from __future__ import annotations
 from datetime import time, timezone
+
 from discord import app_commands, Interaction, Embed
 from discord.ext import commands, tasks
 from discord.utils import format_dt, utcnow, _human_join
 from typing import Any, List, Literal, TYPE_CHECKING
-from utils.embed_color import failed
-from utils.fuzzy import DetailByField, search_references, extract_group
-from utils.models import ReferenceInfo
-from utils.paginator import ReferenceSelectPaginator
-from utils.referenceManager import *
-from utils.stringformat import one_reference_string
+from utils import embed_color, fuzzy, models, paginator, referenceManager, stringformat
 
 if TYPE_CHECKING:
     from al9oo import Al9oo
@@ -25,6 +21,7 @@ class Reference(commands.Cog):
     
     def __init__(self, app : Al9oo) -> None:
         self.app = app
+
         if not self.app.is_dev:
             self.auto_renew_references.start()
             self.get_car_list.start()
@@ -53,13 +50,15 @@ class Reference(commands.Cog):
     @get_car_list.before_loop
     async def _ready(self):
         await self.app.wait_until_ready()
-        
+
     async def renew_car_list(self):
-        lists = get_car_list()
+        lists = referenceManager.get_car_list()
         name, cars = await asyncio.create_task(lists.get_list())
-        if not cars or len(cars) == 0:
+
+        if not cars:
             self.logger.warning(f"Failed Renewing Car List.")
             return
+
         setattr(self, name, cars)
         self.logger.info("Car List Renewed Successfully.")
 
@@ -70,7 +69,7 @@ class Reference(commands.Cog):
         async with asyncio.TaskGroup() as tg:
             tmp = [
                 tg.create_task(reference.get_list())
-                for reference in get_references()
+                for reference in referenceManager.get_references()
             ]
             
         for result in tmp:
@@ -93,7 +92,7 @@ class Reference(commands.Cog):
         await self.app._db_renewed.find_one_and_update({}, {"$set" : renew_info})
         
     async def search_failed_handler(self, interaction : Interaction, error : RuntimeError):
-        embed = Embed(colour=failed)
+        embed = Embed(colour=embed_color.failed)
         embed.description = error.__str__()
         
         if interaction.response.is_done():
@@ -101,7 +100,7 @@ class Reference(commands.Cog):
         else:
             await interaction.response.send_message(embed=embed)
 
-    def not_exact_details(self, details : list[DetailByField]):
+    def not_exact_details(self, details : list[models.DetailByField]):
         content = ''
         if details:
             temp = _human_join(
@@ -116,17 +115,17 @@ class Reference(commands.Cog):
                 content += 'Found ' + temp
         return content
     
-    async def send_reference(self, interaction : Interaction, references : list[ReferenceInfo], **kwargs):
+    async def send_reference(self, interaction : Interaction, references : list[models.ReferenceInfo], **kwargs):
         try:
             fields = {k: v for k, v in kwargs.items() if v is not None}
-            result = search_references(fields, references, score_cutoff=60)
+            result = fuzzy.search_references(fields, references, score_cutoff=60)
             
             references = result['references']
             details = result['detail']
             content = self.not_exact_details(details)
             
             if len(references) > 1:    
-                view = ReferenceSelectPaginator.from_list(
+                view = paginator.ReferenceSelectPaginator.from_list(
                     references,
                     author=interaction.user
                 )
@@ -145,17 +144,17 @@ class Reference(commands.Cog):
         self,
         interaction : Interaction,
         *,
-        reference : ReferenceInfo,
+        reference : models.ReferenceInfo,
         content : str = "",
     ):        
-        content += "\n" + one_reference_string(reference)
-        
+        content += "\n" + stringformat.one_reference_string(reference)
+
         if interaction.response.is_done():
             await interaction.followup.send(content)
         else:
             await interaction.response.send_message(content)
-        
-    async def ch_autocompletion(
+
+    async def carhunt_autocompletion(
         self,
         interaction: Interaction,
         current: str
@@ -164,7 +163,7 @@ class Reference(commands.Cog):
         if not current:
             result: list[str] = [a.car for a in self.carhunt_reference]
         else:
-            result: list[str] = extract_group(current, 'car', self.carhunt_reference)
+            result: list[str] = fuzzy.extract_group(current, 'car', self.carhunt_reference)
 
         return [
            app_commands.Choice(name=choice, value=choice) for choice in result
@@ -180,12 +179,12 @@ class Reference(commands.Cog):
     @app_commands.describe(car='What\'s the name of Car?')
     @app_commands.guild_only()
     @app_commands.checks.bot_has_permissions(embed_links=True)
-    @app_commands.autocomplete(car=ch_autocompletion)
+    @app_commands.autocomplete(car=carhunt_autocompletion)
     async def carhunt(self, interaction : Interaction, car : str):
         await interaction.response.defer(thinking=True)
         await self.send_reference(interaction, self.carhunt_reference, car=car) # reference params
 
-    async def area_autocompletion(
+    async def clash_autocompletion(
         self,
         interaciton: Interaction,
         current: str,
@@ -194,7 +193,7 @@ class Reference(commands.Cog):
         if not current:
             result: list[str] = list(set([a.track for a in self.clash_reference]))
         else:
-            result: list[str] = extract_group(current, 'track', self.clash_reference)
+            result: list[str] = fuzzy.extract_group(current, 'track', self.clash_reference)
 
         return [
            app_commands.Choice(name=choice, value=choice)
@@ -211,7 +210,7 @@ class Reference(commands.Cog):
     @app_commands.describe(track='Search track.')
     @app_commands.guild_only()
     @app_commands.checks.bot_has_permissions(embed_links=True)
-    @app_commands.autocomplete(track=area_autocompletion)
+    @app_commands.autocomplete(track=clash_autocompletion)
     async def clash(
         self,
         interaction: Interaction,
@@ -238,7 +237,7 @@ class Reference(commands.Cog):
         await interaction.response.defer(thinking=True)
         await self.send_reference(interaction, self.elite_reference, cls=cls)
 
-    async def track_autocompletion(
+    async def weekly_autocompletion(
         self,
         interaction: Interaction,
         current: str,
@@ -247,7 +246,7 @@ class Reference(commands.Cog):
         if not current:
             matches: list[str] = list(set([a.track for a in self.weekly_reference]))
         else:
-            matches: list[str] = extract_group(current, 'track', self.weekly_reference)
+            matches: list[str] = fuzzy.extract_group(current, 'track', self.weekly_reference)
 
         return [
            app_commands.Choice(name=choice, value=choice)
@@ -264,7 +263,7 @@ class Reference(commands.Cog):
     @app_commands.describe(track='Search Track.')
     @app_commands.guild_only()
     @app_commands.checks.bot_has_permissions(embed_links=True)
-    @app_commands.autocomplete(track=track_autocompletion)
+    @app_commands.autocomplete(track=weekly_autocompletion)
     async def weekly(
         self,
         interaction: Interaction,
