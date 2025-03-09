@@ -20,7 +20,8 @@ class EventHandler(commands.Cog):
     def logger(self):
         return self.app.logger
 
-    async def cog_load(self) -> None:
+    @tasks.loop(count=1)
+    async def startup_current_joined_guild(self):
         await self.current_status()
 
     @tasks.loop(time=guild_log)
@@ -38,6 +39,7 @@ class EventHandler(commands.Cog):
         self.logger.info(f"Currently Joining {count} guild(s).")
 
     @current_joined_guild.before_loop
+    @startup_current_joined_guild.before_loop
     async def _ready(self):
         await self.app.wait_until_ready()
 
