@@ -131,12 +131,12 @@ def setup_logging():
 
 
 @click.command()
-@click.option('-dev', is_flag=True, default=False, help='', required=False)
-def algoo(dev):
+@click.option('-normal', is_flag=True, default=False, help='', required=False)
+def algoo(normal):
     click.echo('Configuring..')
     check_data_folder()
     with setup_logging():
-        if dev:
+        if normal:
             debug = False
             click.echo('Starting with Normal mode.')
         else:
