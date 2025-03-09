@@ -7,26 +7,15 @@ from typing import (
     Callable,
     Generator,
     Literal,
-    Iterable,
-    NamedTuple,
     TypedDict,
     Optional,
     overload,
 )
 from rapidfuzz import fuzz, process
-from .models import ReferenceInfo
-
-import re
+from .models import ReferenceInfo, DetailByField
 
 
 T = TypeVar('T')
-
-
-class DetailByField(NamedTuple):
-    field : str
-    user_search : str
-    suggestion : str
-    exact : bool
 
 
 @dataclass
@@ -82,23 +71,6 @@ def _oc_scorer(query : str, choice : str, **kwargs) -> float:
     if base_score >= 100.0:
         return 100.0
     return base_score
-
-
-def _string_mapper(
-    text : str,
-    collection : Iterable[T],
-    *,
-    key: Optional[Callable[[T], str]] = None,
-):
-    text = str(text)
-    pat = '.*?'.join(map(re.escape, text))
-    regex = re.compile(pat, flags=re.IGNORECASE)
-    
-    for item in collection:
-        to_search = key(item) if key else str(item)
-        r = regex.search(to_search)
-        if r:
-            yield len(r.group()), r.start(), item
 
 
 @overload
