@@ -30,7 +30,7 @@ class AlgooError(Exception):
     pass
 
 
-class LoadingFailedMongoDrive(AlgooError):
+class FailedLoadingMongoDrive(AlgooError):
     def __init__(self) -> None:
         self.message = 'Failed Loading Mongo driver.'
         super().__init__(self.message)

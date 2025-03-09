@@ -3,7 +3,7 @@ from al9oo import Al9oo
 from config import refer_db
 from logging.handlers import RotatingFileHandler
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.exception import LoadingFailedMongoDrive
+from utils.exception import FailedLoadingMongoDrive
 
 import click
 import discord
@@ -33,7 +33,7 @@ async def create_pool():
                 return client
         except Exception:
             attempt += 1
-    raise LoadingFailedMongoDrive
+    raise FailedLoadingMongoDrive
 
 
 async def main(is_dev : bool = False):
@@ -48,7 +48,8 @@ async def main(is_dev : bool = False):
     try:
         log.info('Configuring MongoDB Driver')
         pool = await create_pool()
-    except LoadingFailedMongoDrive:
+
+    except FailedLoadingMongoDrive:
         log.exception('Could not set up Mongo. Exiting.')
         return
     
@@ -130,12 +131,12 @@ def setup_logging():
 
 
 @click.command()
-@click.option('-normal', is_flag=True, default=False, help='', required=False)
-def algoo(normal):
+@click.option('-dev', is_flag=True, default=False, help='', required=False)
+def algoo(dev):
     click.echo('Configuring..')
     check_data_folder()
     with setup_logging():
-        if not normal:
+        if dev:
             debug = False
             click.echo('Starting with Normal mode.')
         else:
