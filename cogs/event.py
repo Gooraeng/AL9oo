@@ -15,6 +15,7 @@ class EventHandler(commands.Cog):
     def __init__(self, app : Al9oo):
         self.app = app
         self.current_joined_guild.start()
+        self.startup_current_joined_guild.start()
 
     @property
     def logger(self):
