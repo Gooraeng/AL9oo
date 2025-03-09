@@ -40,7 +40,7 @@ class AppCommandErrorHandler(commands.Cog):
     async def on_app_command_error(self, interaction : Interaction, error : app_commands.AppCommandError):
         error_time = interaction.created_at
         embed = Embed(title='', description='', color=etc, timestamp=error_time)
-        do_report : bool = True
+        do_report : bool = False
         
         if isinstance(error, FeedbackButtonOnCooldown):
             until = error_time + timedelta(seconds=error.retry_after)
@@ -68,10 +68,14 @@ class AppCommandErrorHandler(commands.Cog):
             embed.description = f'You are temporarily blocked using </{interaction.command.qualified_name}:{interaction.data["id"]}> again until {retry_after}'
             
         elif isinstance(error, app_commands.BotMissingPermissions):
-            missing_list = [perm.replace('_', ' ').replace('guild', 'server').title() for perm in error.missing_permissions]
-            missing = "\n* ".join(s for s in missing_list)
+            do_report = False
+            missing_list = [
+                perm.replace('_', ' ').replace('guild', 'server').title()
+                for perm in error.missing_permissions
+            ]
+            missing = "\n* ".join(missing_list)
             if interaction.user.guild_permissions.manage_roles:
-                embed.description= "Please check interact channel's permission(s)!"
+                embed.description= "Please check this channel's permission(s) granted to AL9oo!"
             else:
                 embed.description = "Please Contact Server Moderator you are in to fix permission(s)!"
             embed.add_field(name="Missing Permission(s)", value=f"* {missing}")
@@ -84,17 +88,16 @@ class AppCommandErrorHandler(commands.Cog):
                 * Error Type : {e.__class__.__name__}
                 * Error Summary : {e}
                 * Command : {error.command.qualified_name}
-                Please run it again. If you are countinuing get failuare, consider to report with `/feedback` command.
+                Please run it again. If you are continuing get failure, consider to report with `/feedback` command.
                 """
             )
+            do_report = True
         
         elif isinstance(error, discord.DiscordServerError):
             e = error.text
-            do_report = False
-            
             embed.title = 'Discord Server error'
             embed.description = "This is Discord's fault, not me. So this will not be reported."
-            await asyncio.sleep(15)
+            await asyncio.sleep(5)
         
         elif isinstance(error, RuntimeError):
             embed.title = 'RuntimeError'
@@ -143,14 +146,14 @@ class AppCommandErrorHandler(commands.Cog):
             return f'{datetime.fromtimestamp(now).strftime("%Y/%m/%d %H:%M:%S")} (UTC)'
         
         data = await self.lg.find({}).sort('detected_at', 1).to_list(length=150)
-        if not data or len(data) == 0:
+        if not data:
             return
         
-        errors = [ErrorLogTrace(**doc) for doc in data]        
+        errors = (ErrorLogTrace(**doc) for doc in data)
         files : list[NumberedObject] = []
         max_file_size = 9 * 1024 * 1024
 
-        for i in errors: 
+        for i in errors:
             log_detail = inspect.cleandoc(
                 f"""
                 * SENT AT : {formatted_time()}
@@ -163,19 +166,19 @@ class AppCommandErrorHandler(commands.Cog):
             file = File(fp, filename=f'error-log-{int(i.detected_at*1000)}.txt')
             
             if sys.getsizeof(file) < max_file_size:
-                files.append(NumberedObject(_id=i.id, object=file))      
+                files.append(NumberedObject(_id=i.id, object=file))
 
         done : list[ObjectId] = []
         failed : list[ObjectId] = []
-        
         per_send = 10
+
         for i in range(0, len(files), per_send):
             temp_files = files[i:+i+per_send]
-            files = [f.object for f in temp_files if isinstance(f.object, discord.File)]
+            temp = [f.object for f in temp_files if isinstance(f.object, discord.File)]
             object_ids = [s.id for s in temp_files]
             
             try:
-                await self.app.el_hook.send(files=files)
+                await self.app.el_hook.send(files=temp)
                 done += object_ids
             
             except Exception as e:
@@ -197,7 +200,7 @@ class AppCommandErrorHandler(commands.Cog):
             self.logger.error("오류 총 %s개 전송 실패", len(failed))
             
     @error_report.before_loop
-    async def ready(self):
+    async def _ready(self):
         await self.app.wait_until_ready()
 
 

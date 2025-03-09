@@ -57,23 +57,6 @@ class EventHandler(commands.Cog):
     async def on_guild_remove(self, guild: discord.Guild):
         self.logger.info("[Guild Remove] Guild ID : %s", guild.id)
 
-    @commands.Cog.listener()
-    async def on_app_command_completion(self, interaction: discord.Interaction, command : discord.app_commands.Command):
-        try:
-            options = (f"{option['name']}:{option['value']}" for option in interaction.data["options"])
-            result = ", ".join(options)
-        except KeyError:
-            result = "NULL"
-
-        command_info = (
-            "<"
-            f"Command={command.qualified_name}>, <Options={result}>, "
-            f"<Guild={interaction.guild_id}, "
-            f"Channel={interaction.channel_id}"
-            ">"
-        )
-        self.logger.info(command_info)
-
 
 async def setup(app : Al9oo):
     await app.add_cog(EventHandler(app))
