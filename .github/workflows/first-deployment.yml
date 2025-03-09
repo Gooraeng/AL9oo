@@ -102,14 +102,14 @@ jobs:
             After=multi-user.target
             [Service]
             Type=simple
-            ExecStart=$(pwd)/venv/bin/python3 $(pwd)/venv/${{ env.REPO_NAME }}/launcher.py
+            ExecStart=$(pwd)/venv/bin/python3 $(pwd)/venv/${{ env.REPO_NAME }}/launcher.py -normal
             User=${{ env.VPS_USER }}
             Restart=on-failure
             RestartSec=30
             WorkingDirectory=$(pwd)/venv/${{ env.REPO_NAME }}/
             [Install]
             WantedBy=multi-user.target" > /etc/systemd/system/${{ env.REPO_NAME }}.service'
-            chmod +x '$(pwd)/venv/${{ env.REPO_NAME }}/launcher.py -normal'
+            chmod +x $(pwd)/venv/${{ env.REPO_NAME }}/launcher.py
             sudo systemctl enable ${{ env.REPO_NAME }}.service
             sudo systemctl daemon-reload
             sudo systemctl start ${{ env.REPO_NAME }}.service
