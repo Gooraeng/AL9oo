@@ -304,7 +304,7 @@ class Utils(commands.Cog):
     @app_commands.command(description="Are you interested in my source?")
     @app_commands.checks.dynamic_cooldown(check_interaction, key=lambda i : i.user.id)
     async def source(self, interaction : Interaction):
-        url = "https://github.com/Gooraeng/AL9oo_"
+        url = "https://github.com/Gooraeng/AL9oo"
         view = InviteLinkView(label='MY SOURCE', url=url)
         await interaction.response.send_message(url, view=view)
 
