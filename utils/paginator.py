@@ -237,7 +237,7 @@ class BasePaginator(ui.View):
         check_embeds : bool = True,
         compact : bool = False
     ):
-        super().__init__()
+        super().__init__(timeout=300)
         self.source = source
         self.current_page: int = 0
         self.check_embeds = check_embeds
@@ -542,11 +542,7 @@ class ReferenceSelectPaginator(BasePaginator):
 
     async def on_timeout(self):
         if self.message:
-            embed = Embed(
-                description="Time out. Terminated.",
-                color=0xff0000
-            )
-            await self.message.edit(content=None, view=None, embed=embed)
+            await self.message.edit(view=None)
 
 
 class ReferenceSelectPageSource(menus.ListPageSource):
