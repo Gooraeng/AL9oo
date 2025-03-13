@@ -1,7 +1,6 @@
 from .check import *
 from .embed_color import *
 from .exception import *
-from .finder import *
 from .fuzzy import *
 from .models import *
 from .paginator import *
