@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import inspect
 from collections import deque, OrderedDict
+
+import discord.utils
 from discord import (
     ButtonStyle,
     ComponentType,
@@ -416,8 +418,15 @@ class BasePaginator(ui.View):
         self.stop()
 
     async def on_timeout(self) -> None:
-        if self.message:
-            await self.message.edit(view=None,)
+        msg = self.message
+        if msg:
+            if not (msg.embeds or msg.content):
+                return
+
+            try:
+                await msg.edit(view=None)
+            except discord.HTTPException:
+                pass
 
 
 class ReferenceSelectPaginator(BasePaginator):
