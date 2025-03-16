@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import inspect
 from collections import deque, OrderedDict
 from discord import (
     ButtonStyle,
@@ -346,8 +348,13 @@ class BasePaginator(ui.View):
             kwargs.setdefault('content', content)
 
         self._update_labels(0)
-        self.message = await interaction.edit_original_response(**kwargs, view=self)
-
+        if interaction.response.is_done():
+            self.message = await interaction.edit_original_response(**kwargs, view=self)
+        else:
+            message = await interaction.response.send_message(**kwargs, view=self)
+            if isinstance(message, InteractionMessage):
+                self.message = message
+    
     @ui.button(label='≪', style=ButtonStyle.grey, )
     async def go_to_first_page(self, interaction: Interaction, button: ui.Button):
         """go to the first page"""
@@ -424,7 +431,8 @@ class ReferenceSelectPaginator(BasePaginator):
     ):
         super().__init__(source, author=author, check_embeds=check_embeds, compact=compact)
         self.paging_class = None
-        
+        self.buttons = None
+
         self.other_buttons = [self.numbered_page, self.stop_pages]
         self.paging_buttons = [i for i in self.children if i.type == ComponentType.button and i not in self.other_buttons]
         self.clear_items()
@@ -492,7 +500,6 @@ class ReferenceSelectPaginator(BasePaginator):
     def config_class_buttons(self, initial_row : int = 0):
         row = initial_row
         buttons : List[ui.Button] = []
-        self.buttons = None
         
         for idx, label in enumerate(self.sources.keys()):
             row = len(buttons) // 5 + initial_row
@@ -510,9 +517,17 @@ class ReferenceSelectPaginator(BasePaginator):
             for i in buttons:
                 self.add_item(i)
             self.buttons = buttons
-        
-        self.source = self.sources[self.paging_class]
-        self.fill_paginator_items()
+
+        if self.paging_class is not None:
+            self.source = self.sources[self.paging_class]
+            self.fill_paginator_items()
+        else:
+            err = inspect.cleandoc(
+                """Failed To Bring Search Result. This error may be come from Reference System Failure.
+                So please try again later.
+                """
+            )
+            raise RuntimeError(err)
             
     def fill_paginator_items(self) -> None:
         if not self.compact:
@@ -539,10 +554,6 @@ class ReferenceSelectPaginator(BasePaginator):
         )
         await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=10)
         return False
-
-    async def on_timeout(self):
-        if self.message:
-            await self.message.edit(view=None)
 
 
 class ReferenceSelectPageSource(menus.ListPageSource):
