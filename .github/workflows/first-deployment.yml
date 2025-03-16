@@ -1,4 +1,4 @@
-name: First Deployment
+name: (Re)initialize Deployment
 on:
   workflow_dispatch:
 env:
