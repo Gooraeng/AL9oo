@@ -419,13 +419,13 @@ class BasePaginator(ui.View):
 
     async def on_timeout(self) -> None:
         msg = self.message
-        if msg:
-            if not (msg.embeds or msg.content):
-                return
+        if msg is None:
+            return
 
+        if msg.embeds or msg.content:
             try:
                 await msg.edit(view=None)
-            except discord.HTTPException:
+            except (discord.HTTPException, discord.Forbidden):
                 pass
 
 
