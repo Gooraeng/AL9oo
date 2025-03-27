@@ -1,9 +1,5 @@
 from __future__ import annotations
-
-import inspect
 from collections import deque, OrderedDict
-
-import discord.utils
 from discord import (
     ButtonStyle,
     ComponentType,
@@ -17,11 +13,13 @@ from discord import (
     utils,
 )
 from discord.ext import menus
+from discord.utils import maybe_coroutine
 from typing import Any, List, Optional, Union, TypeVar, Sequence
 from typing_extensions import Self
 from .models import ReferenceInfo
 from .stringformat import one_reference_string
 
+import inspect
 import itertools
 
 
@@ -294,7 +292,7 @@ class BasePaginator(ui.View):
                 self.go_to_previous_page.label = '…'
 
     async def _get_kwargs_from_page(self, page: int) -> dict[str, Any]:
-        value = await utils.maybe_coroutine(self.source.format_page, self, page)
+        value = await maybe_coroutine(self.source.format_page, self, page)
         if isinstance(value, dict):
             return value
         elif isinstance(value, str):
@@ -418,15 +416,10 @@ class BasePaginator(ui.View):
         self.stop()
 
     async def on_timeout(self) -> None:
-        msg = self.message
-        if msg is None:
-            return
-
-        if msg.embeds or msg.content:
-            try:
-                await msg.edit(view=None)
-            except (discord.HTTPException, discord.Forbidden):
-                pass
+        try:
+            await self.message.edit(view=None)
+        except Exception:
+            pass
 
 
 class ReferenceSelectPaginator(BasePaginator):
@@ -474,7 +467,7 @@ class ReferenceSelectPaginator(BasePaginator):
         self.sources = sorted_sources
 
     async def _get_kwargs_from_page(self, page: int) -> dict[str, Any]:
-        value = await utils.maybe_coroutine(self.source.format_page, self, page)
+        value = await maybe_coroutine(self.source.format_page, self, page)
         if isinstance(value, dict):
             return value
         elif isinstance(value, str):
