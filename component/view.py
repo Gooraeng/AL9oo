@@ -1,8 +1,10 @@
 from __future__ import annotations
-from al9oo import Al9oo
 from discord import ui
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 from utils.embed_color import failed
+
+if TYPE_CHECKING:
+    from al9oo import Al9oo
 
 import asyncio
 import discord

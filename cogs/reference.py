@@ -5,7 +5,14 @@ from discord import app_commands, Interaction, Embed
 from discord.ext import commands, tasks
 from discord.utils import format_dt, utcnow, _human_join
 from typing import Any, List, Literal, TYPE_CHECKING
-from utils import embed_color, fuzzy, models, paginator, referenceManager, stringformat
+from utils import (
+    embed_color,
+    fuzzy,
+    models,
+    paginator,
+    referenceManager,
+    stringformat
+)
 
 if TYPE_CHECKING:
     from al9oo import Al9oo
@@ -90,8 +97,9 @@ class Reference(commands.Cog):
             self.logger.info(f"{name} reference renewed.")
 
         await self.app._db_renewed.find_one_and_update({}, {"$set" : renew_info})
-        
-    async def search_failed_handler(self, interaction : Interaction, error : RuntimeError):
+
+    @staticmethod
+    async def search_failed_handler(interaction : Interaction, error : RuntimeError):
         embed = Embed(colour=embed_color.failed)
         embed.description = error.__str__()
         
@@ -100,7 +108,8 @@ class Reference(commands.Cog):
         else:
             await interaction.response.send_message(embed=embed)
 
-    def not_exact_details(self, details : list[models.DetailByField]):
+    @staticmethod
+    def not_exact_details(details : list[models.DetailByField]):
         content = ''
         if details:
             temp = _human_join(
@@ -139,9 +148,9 @@ class Reference(commands.Cog):
             
         except (RuntimeError, ValueError) as e:
             await self.search_failed_handler(interaction, e)
-    
+
+    @staticmethod
     async def send_one(
-        self,
         interaction : Interaction,
         *,
         reference : models.ReferenceInfo,
