@@ -124,10 +124,10 @@ class Reference(commands.Cog):
                 content += 'Found ' + temp
         return content
     
-    async def send_reference(self, interaction : Interaction, references : list[models.ReferenceInfo], **kwargs):
+    async def send_reference(self, interaction : Interaction, reference : list[models.ReferenceInfo], **kwargs):
         try:
             fields = {k: v for k, v in kwargs.items() if v is not None}
-            result = fuzzy.search_references(fields, references, score_cutoff=60)
+            result = fuzzy.search_references(fields, reference, score_cutoff=60)
             
             references = result['references']
             details = result['detail']
@@ -170,9 +170,9 @@ class Reference(commands.Cog):
     ) -> List[app_commands.Choice[str]]:
 
         if not current:
-            result: list[str] = [a.car for a in self.carhunt_reference]
+            result: list[str] = [a.car for a in self.carhunt_reference.copy()]
         else:
-            result: list[str] = fuzzy.extract_group(current, 'car', self.carhunt_reference)
+            result: list[str] = fuzzy.extract_group(current, 'car', self.carhunt_reference.copy())
 
         return [
            app_commands.Choice(name=choice, value=choice) for choice in result
@@ -191,7 +191,7 @@ class Reference(commands.Cog):
     @app_commands.autocomplete(car=carhunt_autocompletion)
     async def carhunt(self, interaction : Interaction, car : str):
         await interaction.response.defer(thinking=True)
-        await self.send_reference(interaction, self.carhunt_reference, car=car) # reference params
+        await self.send_reference(interaction, self.carhunt_reference.copy(), car=car) # reference params
 
     async def clash_autocompletion(
         self,
@@ -200,9 +200,9 @@ class Reference(commands.Cog):
     ) -> List[app_commands.Choice[str]]:
 
         if not current:
-            result: list[str] = list(set([a.track for a in self.clash_reference]))
+            result: list[str] = list(set([a.track for a in self.clash_reference.copy()]))
         else:
-            result: list[str] = fuzzy.extract_group(current, 'track', self.clash_reference)
+            result: list[str] = fuzzy.extract_group(current, 'track', self.clash_reference.copy())
 
         return [
            app_commands.Choice(name=choice, value=choice)
@@ -226,7 +226,7 @@ class Reference(commands.Cog):
         track : str,
     ):  
         await interaction.response.defer(thinking=True)
-        await self.send_reference(interaction, self.clash_reference, track=track)
+        await self.send_reference(interaction, self.clash_reference.copy(), track=track)
     
     @app_commands.command(
         description='Let you know elite cup reference!',
@@ -244,7 +244,7 @@ class Reference(commands.Cog):
         cls : Literal["S", "A", "B", "C"], 
     ):  
         await interaction.response.defer(thinking=True)
-        await self.send_reference(interaction, self.elite_reference, cls=cls)
+        await self.send_reference(interaction, self.elite_reference.copy(), cls=cls)
 
     async def weekly_autocompletion(
         self,
@@ -253,9 +253,9 @@ class Reference(commands.Cog):
     ) -> List[app_commands.Choice[str]]:
 
         if not current:
-            matches: list[str] = list(set([a.track for a in self.weekly_reference]))
+            matches: list[str] = list(set([a.track for a in self.weekly_reference.copy()]))
         else:
-            matches: list[str] = fuzzy.extract_group(current, 'track', self.weekly_reference)
+            matches: list[str] = fuzzy.extract_group(current, 'track', self.weekly_reference.copy())
 
         return [
            app_commands.Choice(name=choice, value=choice)
@@ -279,7 +279,7 @@ class Reference(commands.Cog):
         track : str,
     ):      
         await interaction.response.defer(thinking=True)
-        await self.send_reference(interaction, self.weekly_reference, track=track)
+        await self.send_reference(interaction, self.weekly_reference.copy(), track=track)
 
 
 async def setup(app : Al9oo):
