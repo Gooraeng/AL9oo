@@ -24,6 +24,7 @@ jobs:
           args: "-tt"
 
   setup-python:
+    needs: [ clean-up-folder ]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -36,15 +37,14 @@ jobs:
           command: |
             export DEBIAN_FRONTEND=noninteractive
             sudo apt-get install -y python3-pip python3-venv
-            pip --version
-            source ${{env.REPO_NAME}}/source/bin/activate
+            echo "pip installation completed"
+            exit 0
           host: ${{ secrets.VPS_IP }}
           user: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          args: "-tt"
-  
+
   deploy-via-sftp:
-    needs: [ clean-up-folder, setup-python ]
+    needs: [ clean-up-folder ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -61,7 +61,7 @@ jobs:
           local_path: ./*
           # destination of the code on the server
           remote_path: ./${{ env.REPO_NAME }}
-          sftpArgs: '-o ConnectTimeout=15'
+          sftpArgs: '-o ConnectTimeout=30'
 
   install-requirements:
     needs: [ deploy-via-sftp ]
@@ -79,7 +79,6 @@ jobs:
           host: ${{ secrets.VPS_IP }}
           user: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          args: "-tt"
 
   add-secret-variables:
     needs: [deploy-via-sftp]
@@ -105,8 +104,8 @@ jobs:
             echo "FEEDBACK_WH=${{ secrets.FEEDBACK_WH }}" >> .env
             echo "LOG_WH=${{ secrets.LOG_WH }}" >> .env
             echo $?
-          host: ${{ env.VPS_IP }}
-          user: ${{ env.VPS_USER }}
+          host: ${{ secrets.VPS_IP }}
+          user: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
   
   create-systemctl-service:
@@ -134,8 +133,8 @@ jobs:
             sudo systemctl enable ${{ env.REPO_NAME }}.service
             sudo systemctl daemon-reload
             sudo systemctl start ${{ env.REPO_NAME }}.service
-          host: ${{ env.VPS_IP }}
-          user: ${{ env.VPS_USER }}
+          host: ${{ secrets.VPS_IP }}
+          user: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
     
   create-systemctl-restart:
@@ -157,6 +156,6 @@ jobs:
             sudo systemctl enable ${{ env.REPO_NAME }}-watcher.service
             sudo systemctl daemon-reload
             sudo systemctl start ${{ env.REPO_NAME }}-watcher.service
-          host: ${{ env.VPS_IP }}
-          user: ${{ env.VPS_USER }}
+          host: ${{ secrets.VPS_IP }}
+          user: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
