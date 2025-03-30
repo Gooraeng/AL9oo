@@ -64,7 +64,7 @@ jobs:
           sftpArgs: '-o ConnectTimeout=5'
 
   install-requirements:
-    needs: [ deploy-via-sftp ]
+    needs: [ deploy-via-sftp, setup-python ]
     runs-on: ubuntu-latest
     steps:
       - name: Install Requirements
@@ -122,7 +122,7 @@ jobs:
             After=multi-user.target
             [Service]
             Type=simple
-            ExecStart=$(pwd)/venv/bin/python3 $(pwd)/${{ env.REPO_NAME }}/launcher.py -normal
+            ExecStart=$(pwd)/${{env.REPO_NAME}}/${{env.VENV}}/bin/python3 $(pwd)/${{ env.REPO_NAME }}/launcher.py -normal
             User=${{ env.VPS_USER }}
             Restart=on-failure
             RestartSec=30
