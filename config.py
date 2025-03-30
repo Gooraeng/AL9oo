@@ -29,20 +29,18 @@ fwh = os.environ.get('FEEDBACK_WH')
 elwh = os.environ.get('ERROR_LOG_WH')
 
 feedback_log_channel = os.environ.get('FEEDBACK_LOG_CHANNEL')
-suggestion_channel = os.environ.get('SUGGESTION_CHANNEL')
 
 al9oo_main_announcement = 1160568027377578034
 al9oo_urgent_alert = 1161584379571744830
-arn_channel = 1188494656170901546
 
-vaild_formats = [
+valid_formats = [
     "image/jpeg",
     "image/png",
     "image/gif",
     "image/webp"
 ]
 
-log_data = pathlib.Path(__file__).parent / 'data/al9oo.log'
+log_data = pathlib.Path(__file__).parent / 'al9oo.log'
 
 MB = 1024 * 1024
 MAX_GLOBAL_FILE_SIZE = 9.5 * MB
