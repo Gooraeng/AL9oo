@@ -1,5 +1,5 @@
 from __future__ import annotations
-from config import vaild_formats
+from config import valid_formats
 from inspect import cleandoc
 from typing import Sequence
 from .models import ReferenceTypes
@@ -81,7 +81,7 @@ class FeedbackButtonOnCooldown(ButtonOnCooldown):
 
 class InvaildFileFormat(TypeError):
     def __init__(self) -> None:
-        vaild_formats_str = _human_join(vaild_formats, final='and')
+        vaild_formats_str = _human_join(valid_formats, final='and')
         self.msg = f'The Format must be one of that : {vaild_formats_str}'
         super().__init__(self.msg)
 
