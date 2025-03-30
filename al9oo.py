@@ -29,7 +29,6 @@ initial_extensions = (
     'cogs.error',
     'cogs.event',
     'cogs.feedback',
-    'cogs.history',
     'cogs.reference',
     'cogs.utils',
 )
@@ -75,7 +74,6 @@ class Al9oo(commands.AutoShardedBot):
     async def set_feedback_channel(self):
         try:
             self._feedback_channel = self.get_channel(int(feedback_log_channel)) or await self.fetch_channel(int(feedback_log_channel))
-            self._suggestion_channel = self.get_channel(int(suggestion_channel)) or await self.fetch_channel(int(suggestion_channel))
         except:
             pass
         
@@ -164,10 +162,6 @@ class Al9oo(commands.AutoShardedBot):
     @property
     def feedback_channel(self) -> WebhookMessagableChannel:
         return self._feedback_channel
-    
-    @property
-    def suggestion_channel(self) -> ForumChannel:
-        return self._suggestion_channel
     
     @property
     def err_handler(self) -> Optional[error.AppCommandErrorHandler]:
