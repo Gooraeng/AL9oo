@@ -222,7 +222,7 @@ class Reference(commands.Cog):
     @app_commands.autocomplete(track=gauntlet_autocompletion)
     async def gauntlet(self, interaction: Interaction, track: str):
         await interaction.response.defer(thinking=True)
-        await self.send_reference(interaction, self.carhunt_reference.copy(), track=track)  # reference params
+        await self.send_reference(interaction, self.gauntlet_reference.copy(), track=track)  # reference params
     
     @app_commands.command(
         description='Let you know elite cup reference!',
