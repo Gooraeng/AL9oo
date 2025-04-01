@@ -301,13 +301,6 @@ class Utils(commands.Cog):
         view = InviteLinkView(label="AL9oo Support Server")
         await interaction.response.send_message(embed=embed, view=view)
 
-    @app_commands.command(description="Are you interested in my source?")
-    @app_commands.checks.dynamic_cooldown(check_interaction, key=lambda i : i.user.id)
-    async def source(self, interaction : Interaction):
-        url = "https://github.com/Gooraeng/AL9oo"
-        view = InviteLinkView(label='MY SOURCE', url=url)
-        await interaction.response.send_message(url, view=view)
-
     @app_commands.command(description="am 'I'?")
     @app_commands.checks.dynamic_cooldown(check_interaction, key=lambda i: i.user.id)
     async def who(self, interaction : Interaction):                
