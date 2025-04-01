@@ -87,7 +87,7 @@ class Reference(commands.Cog):
             if count in renew_info and applied in renew_info:
                 continue
 
-            if not reference or len(reference) == 0:
+            if not reference:
                 continue
 
             renew_info[count] = len(reference)
@@ -193,16 +193,16 @@ class Reference(commands.Cog):
         await interaction.response.defer(thinking=True)
         await self.send_reference(interaction, self.carhunt_reference.copy(), car=car) # reference params
 
-    async def clash_autocompletion(
+    async def gauntlet_autocompletion(
         self,
-        interaciton: Interaction,
-        current: str,
+        interaction : Interaction,
+        current : str
     ) -> List[app_commands.Choice[str]]:
 
         if not current:
-            result: list[str] = list(set([a.track for a in self.clash_reference.copy()]))
+            result: list[str] = list(set([a.track for a in self.gauntlet_reference.copy()]))
         else:
-            result: list[str] = fuzzy.extract_group(current, 'track', self.clash_reference.copy())
+            result: list[str] = fuzzy.extract_group(current, 'track', self.gauntlet_reference.copy())
 
         return [
            app_commands.Choice(name=choice, value=choice)
@@ -211,22 +211,18 @@ class Reference(commands.Cog):
        ][:25]
 
     @app_commands.command(
-        description='Check Club Clash references!',
+        description='Search Gauntlet References!',
         extras={
-            "permissions" : ["Embed Links"],
+            "permissions": ["Embed Links"]
         }
     )
-    @app_commands.describe(track='Search track.')
+    @app_commands.describe(car='What\'s the name of Car?')
     @app_commands.guild_only()
     @app_commands.checks.bot_has_permissions(embed_links=True)
-    @app_commands.autocomplete(track=clash_autocompletion)
-    async def clash(
-        self,
-        interaction: Interaction,
-        track : str,
-    ):  
+    @app_commands.autocomplete(car=carhunt_autocompletion)
+    async def gauntlet(self, interaction: Interaction, track: str):
         await interaction.response.defer(thinking=True)
-        await self.send_reference(interaction, self.clash_reference.copy(), track=track)
+        await self.send_reference(interaction, self.carhunt_reference.copy(), track=track)  # reference params
     
     @app_commands.command(
         description='Let you know elite cup reference!',

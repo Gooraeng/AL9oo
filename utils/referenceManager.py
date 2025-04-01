@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import *
 from aiohttp import ClientSession
-from config import clash_db, carhunt_db, elite_db, weekly_db, car_list_db
+from config import *
 from pathlib import Path
 from typing import Any, List, Optional
 from .models import CarInfo, ReferenceInfo
@@ -26,10 +26,10 @@ log = logging.getLogger(__name__)
 
 
 dbs = [
-    (carhunt_db, "carhunt"),
-    (clash_db, "clash"),
-    (elite_db, "elite"),
-    (weekly_db, "weekly")
+    ("carhunt", carhunt_db),
+    ("elite", elite_db),
+    ("gauntlet", gauntlet_db),
+    ("weekly", weekly_db)
 ]
 
 
@@ -115,7 +115,7 @@ class CsvDataBaseManager(Manager):
             data = list(reader)
             header_indexes = {h : header.index(h) for h in header}
 
-            self._count += len(data)
+            self.count += len(data)
             return header, data, header_indexes
         
         except Exception as e:
@@ -127,13 +127,13 @@ class CsvDataBaseManager(Manager):
 
     @property
     def count(self):
-        return self.__count
+        return self._count
 
     @count.setter
     def count(self, value : int):
         if not isinstance(value, int):
             raise TypeError
-        self.__count = value
+        self._count = value
 
 
 class ReferenceManager(CsvDataBaseManager):
@@ -161,7 +161,7 @@ class ReferenceManager(CsvDataBaseManager):
 
             lists = [
                 ReferenceInfo(**{info_headers[header]: data[i][header_indexes[header]] for header in headers})
-                for i in range(self._count)
+                for i in range(self.count)
             ]
             
             log.info(f'Found "{len(lists)}" {self._name} reference(s).')
@@ -202,8 +202,16 @@ class CarListManager(CsvDataBaseManager):
             return self.name, []
 
 
+def _transform_to_spreadsheet_url(id : str) -> str:
+    key = refer_key
+    return f"https://docs.google.com/spreadsheets/d/{key}/export?format=csv&id={key}&gid={id}"
+
+
 def get_references() :
-    return [ReferenceManager(db, url) for url, db in dbs]
+    return [
+        ReferenceManager(name, _transform_to_spreadsheet_url(id))
+        for name, id in dbs
+    ]
 
 
 def get_car_list() :

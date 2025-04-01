@@ -18,11 +18,14 @@ discord_api_token = os.environ.get('DISCORD_API_TOKEN')
 discord_api_token_test = os.environ.get('DISCORD_API_TOKEN_TEST')
 
 refer_db = os.environ.get('REFER_DB')
-carhunt_db = os.environ.get('CARHUNT_DB')
-clash_db = os.environ.get('CLASH_DB')
-elite_db = os.environ.get('ELITE_DB')
-weekly_db = os.environ.get('WEEKLY_DB')
 car_list_db = os.environ.get('CAR_LIST_DB')
+
+refer_key = os.environ.get('REFER_KEY')
+carhunt_db = os.environ.get('CARHUNT_DB')
+elite_db = os.environ.get('ELITE_DB')
+gauntlet_db = os.environ.get('GAUNTLET_DB')
+weekly_db = os.environ.get('WEEKLY_DB')
+
 
 lwh = os.environ.get('LOG_WH')
 fwh = os.environ.get('FEEDBACK_WH')
