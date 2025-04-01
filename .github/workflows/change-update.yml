@@ -1,54 +1,42 @@
-name: (Re)initialize Deployment
-run-name: (Re)initialize Deployment by ${{ github.actor }}
+name: Reinitialize Deployment
+run-name: Reinitialize Deployment by ${{ github.actor }}
 
 on:
+  workflow_run:
+    workflows: [ "Initialize pip and venv" ]
+    types:
+      - completed
   workflow_dispatch:
 
 env:
   REPO_NAME: ${{ github.event.repository.name }}
   VENV: "venv"
-  PYTHON: "3.12"
 
 jobs:
-  clean-up-folder:
+  install-venv:
     runs-on: ubuntu-latest
     steps:
-      - name: Remove Existing Folder
+      - name: Setup Venv
         uses: fifsky/ssh-action@master
         with:
           command: |
-            rm -rf ${{ env.REPO_NAME }} && mkdir ${{ env.REPO_NAME }}
-          host: ${{ secrets.VPS_IP }}
-          user: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          args: "-tt"
-
-  setup-python:
-    needs: [ clean-up-folder ]
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install pip and venv
-        uses: fifsky/ssh-action@master
-        with:
-          command: |
-            export DEBIAN_FRONTEND=noninteractive
-            sudo apt-get install -y python3-pip python3-venv
-            echo "pip installation completed"
+            mkdir -p ${{ env.REPO_NAME }} && cd ${{ env.REPO_NAME }}
+            rm -rf ${{env.VENV}}
+            python3 -m venv ${{env.VENV}}
+            source ${{env.VENV}}/bin/activate
+            pip --version
+            deactivate
+            echo "Venv Setup Done!"
             exit 0
           host: ${{ secrets.VPS_IP }}
           user: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
   deploy-via-sftp:
-    needs: [ clean-up-folder ]
+    needs: [ install-venv ]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Deploy to Server
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
@@ -64,7 +52,7 @@ jobs:
           sftpArgs: '-o ConnectTimeout=5'
 
   install-requirements:
-    needs: [ deploy-via-sftp, setup-python ]
+    needs: [ deploy-via-sftp ]
     runs-on: ubuntu-latest
     steps:
       - name: Install Requirements
@@ -72,7 +60,6 @@ jobs:
         with:
           command: |
             cd ${{ env.REPO_NAME }}
-            python3 -m venv ${{env.VENV}}
             source ${{env.VENV}}/bin/activate
             pip install --upgrade pip
             pip install -U -r ./requirements.txt
@@ -81,7 +68,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
   add-secret-variables:
-    needs: [deploy-via-sftp]
+    needs: [ deploy-via-sftp ]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -93,9 +80,10 @@ jobs:
             echo "DISCORD_API_TOKEN='${{ secrets.DISCORD_API_TOKEN }}'" > .env
             echo "DISCORD_API_TOKEN_TEST='${{ secrets.DISCORD_API_TOKEN_TEST }}'" >> .env
             echo "REFER_DB='${{ secrets.REFER_DB }}'" >> .env
+            echo "REFER_KEY='${{ secrets.REFER_KEY }}'" >> .env
             echo "CARHUNT_DB='${{ secrets.CARHUNT_DB }}'" >> .env
-            echo "CLASH_DB='${{ secrets.CLASH_DB }}'" >> .env
             echo "ELITE_DB='${{ secrets.ELITE_DB }}'" >> .env
+            echo "GAUNTLET_DB='${{ secrets.GAUNTLET_DB }}'" >> .env
             echo "WEEKLY_DB='${{ secrets.WEEKLY_DB }}'" >> .env
             echo "CAR_LIST_DB='${{ secrets.CAR_LIST_DB }}'" >> .env
             echo "FEEDBACK_LOG_CHANNEL='${{ secrets.FEEDBACK_LOG_CHANNEL }}'" >> .env
@@ -122,8 +110,8 @@ jobs:
             After=multi-user.target
             [Service]
             Type=simple
-            ExecStart=$(pwd)/${{env.REPO_NAME}}/${{env.VENV}}/bin/python3 $(pwd)/${{ env.REPO_NAME }}/launcher.py -normal
-            User=${{ env.VPS_USER }}
+            ExecStart=$(pwd)/${{env.REPO_NAME}}/${{ env.VENV }}/bin/python3 $(pwd)/${{ env.REPO_NAME }}/launcher.py -normal
+            User=${{ secrets.VPS_USER }}
             Restart=on-failure
             RestartSec=30
             WorkingDirectory=$(pwd)/${{ env.REPO_NAME }}/
