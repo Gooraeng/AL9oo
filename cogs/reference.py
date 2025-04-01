@@ -216,10 +216,10 @@ class Reference(commands.Cog):
             "permissions": ["Embed Links"]
         }
     )
-    @app_commands.describe(car='What\'s the name of Car?')
+    @app_commands.describe(track='What\'s the name of Track?')
     @app_commands.guild_only()
     @app_commands.checks.bot_has_permissions(embed_links=True)
-    @app_commands.autocomplete(car=carhunt_autocompletion)
+    @app_commands.autocomplete(track=gauntlet_autocompletion)
     async def gauntlet(self, interaction: Interaction, track: str):
         await interaction.response.defer(thinking=True)
         await self.send_reference(interaction, self.carhunt_reference.copy(), track=track)  # reference params
