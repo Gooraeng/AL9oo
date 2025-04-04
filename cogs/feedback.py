@@ -199,7 +199,7 @@ class Feedback(commands.Cog):
 
             except Exception as e:
                 failed += object_ids
-                self.logger.error('피드백 전송 실패 : %s 발생 > 에러 리포트 전송 실시', e.__class__.__name__)
+                self.logger.error('피드백 전송 실패 : %s 발생 > 에러 리포트 전송 실시', e.__class__.__name__, exc_info=e)
                 if self.app.err_handler:
                     self.logger.error('에러 리포트 전송 실시')
                     await self.app.err_handler.configure_error(e)

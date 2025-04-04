@@ -183,7 +183,7 @@ class AppCommandErrorHandler(commands.Cog):
             
             except Exception as e:
                 failed += object_ids
-                self.logger.error('에러 로그 전송 실패 : %s 발생 // 건너뜀.', e.__class__.__name__)
+                self.logger.error('에러 로그 전송 실패 : %s 발생 // 건너뜀.', e.__class__.__name__, exc_info=e)
                 continue
             
             finally:
