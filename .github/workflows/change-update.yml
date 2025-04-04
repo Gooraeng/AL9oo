@@ -87,7 +87,7 @@ jobs:
             echo "WEEKLY_DB='${{ secrets.WEEKLY_DB }}'" >> .env
             echo "CAR_LIST_DB='${{ secrets.CAR_LIST_DB }}'" >> .env
             echo "FEEDBACK_LOG_CHANNEL='${{ secrets.FEEDBACK_LOG_CHANNEL }}'" >> .env
-            echo "SUGGESTION_CHANNEL='${{ secrets.SUGGESTION_CHANNEL }}" >> .env
+            echo "SUGGESTION_CHANNEL='${{ secrets.SUGGESTION_CHANNEL }}'" >> .env
             echo "ERROR_LOG_WH='${{ secrets.ERROR_LOG_WH }}'" >> .env
             echo "FEEDBACK_WH='${{ secrets.FEEDBACK_WH }}'" >> .env
             echo "LOG_WH='${{ secrets.LOG_WH }}'" >> .env
