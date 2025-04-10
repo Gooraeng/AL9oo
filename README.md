@@ -16,15 +16,17 @@
 
 
 ### ⚙️ Environment
-- Python(3.10.11 ~ 3.12.x / 64-bit)
-- Discord.py (2.4.0) 
+- Python(3.12.x)
+- Discord.py (2.5.2) 
 - **IDE** : Microsoft Visual Studio Code
 - Deployed platform
   * 23.10.05 ~ 24.02.01 : <a href = "https://www.koyeb.com/">Koyeb</a>
   * 24.02.01 ~ 24.02.09 : <a href = "https://www.cloudtype.io/">CLOUDTYPE</a>
   * 24.02.09 ~ 24.02.10 : <a href = "https://fly.io/">fly.io</a>
   * 24.02.29 ~ 24.04.17 : Google Cloud Platform
-  * 24.04.17 ~          : OVH
+  * 24.04.17 ~ 25.03.30 : OVH Cloud
+  * 25.03.30 ~ 25.04.16 : Dasabo
+  * 25.04.16 ~          : Service Termination
 
 
 ## 📍 Features
@@ -57,22 +59,7 @@
 - Indicate weekly competition references.
 
 ## ⚙ Utils
-#### 1. /pn alu
-- Server-Only command.
-- Provides Asphalt Legends Unite Release note list.
-- parameters
-  * selective : `search`
-- Select to Watch ALU's patch note.
-  * If you don't set `search`, You can watch latest patch note.
-
-#### 2. /pn algoo
-- Server-Only command.
-- parameters
-  * selective : `search`
-- Select to Watch AL9oo's patch note.
-  * If you don't set `search`, You can watch latest patch note.
-
-#### 3. /feedback
+#### 1. /feedback
 - Server-Only command.
 - Use this when you have something to say to give us feedback.
 - option
@@ -80,38 +67,24 @@
   * Suggestion - Do you have any brilliant idea to improve AL9oo?
   * Others     - Do you have anything else to say besides these two options?
 
-#### 4. /invite
+#### 2. /invite
 - Provides invitation link If you interested in AL9oo.
 
-#### 5. /help
+#### 3. /help
 - Provides all commands' information that you can use.
 
-#### 6. /redeem
+#### 4. /redeem
 - Provides ALU redeem link.
 
-#### 7. /source
+#### 5. /source
 - Provides AL9oo source from github.
 
-#### 8. /support
+#### 6. /support
 - Provides AL9oo Support discord server link.
 
-#### 9. /ping
+#### 7. /ping
 - Provides latency between you and AL9oo.
 - It may not be accurate.
-
-
-## 📢 Follows AL9oo Support Server
-- These commands are visible for Administrator.
-- AL9oo must have "Manage Webhooks" for these features.
-- Server-Only commands.
-#### 1. /follow start
-- Starts following AL9oo Server Announcements.
-- You can choose "AL9oo Main Announcement", "AL9oo Urgent Alert" or all of them.
-  * AL9oo Main Announcement : Receive Update for it.
-  * AL9oo Urgent Alert : Receive Maintenance or something urgent issues related to it.
-
-#### 2. /follow stop 
-- Stops Following AL9oo Server Announcements or ALU Release Notes.
 
 
 ## 🧪 Potential Features
