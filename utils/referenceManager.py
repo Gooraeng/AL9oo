@@ -115,7 +115,7 @@ class CsvDataBaseManager(Manager):
             data = list(reader)
             header_indexes = {h : header.index(h) for h in header}
 
-            self.count += len(data)
+            self._count = len(data)
             return header, data, header_indexes
         
         except Exception as e:
