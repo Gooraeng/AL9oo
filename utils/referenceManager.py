@@ -1,5 +1,4 @@
 from __future__ import annotations
-from abc import *
 from aiohttp import ClientSession
 from config import *
 from pathlib import Path
@@ -33,7 +32,7 @@ dbs = [
 ]
 
 
-class ManagerBase(metaclass=ABCMeta):
+class ManagerBase:
     def __init__(
         self,
         url : str,
@@ -43,10 +42,11 @@ class ManagerBase(metaclass=ABCMeta):
     async def _download(self) -> Any:
         raise NotImplementedError
 
-    async def _save(self, newline : Optional[str] = None):
+    async def _process(self):
         raise NotImplementedError
 
-class Manager(ManagerBase):
+
+class FileManager(ManagerBase):
     def __init__(
         self,
         url: str,
@@ -59,15 +59,15 @@ class Manager(ManagerBase):
         else:
             self._session_was_none = False
             self._session = session
+
+    async def _save(self, newline : Optional[str] = None):
+        raise NotImplementedError
         
     def _resolve_path(self):
         raise NotImplementedError
 
-    async def _process(self):
-        raise NotImplementedError
 
-
-class CsvDataBaseManager(Manager):
+class CsvDataBaseManager(FileManager):
     def __init__(
         self,
         name: str,
@@ -132,7 +132,7 @@ class CsvDataBaseManager(Manager):
     @count.setter
     def count(self, value : int):
         if not isinstance(value, int):
-            raise TypeError
+            raise TypeError("This Value Must Be Int.")
         self._count = value
 
 
@@ -144,9 +144,6 @@ class ReferenceManager(CsvDataBaseManager):
         session: Optional[ClientSession] = None,
     ) -> None:
         super().__init__(name, url, session)
-
-    async def _process(self):
-        return await super()._process()
     
     async def get_list(self) -> tuple[str, List[ReferenceInfo]]:
         try:
