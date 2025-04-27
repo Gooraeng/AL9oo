@@ -31,6 +31,89 @@ def check_interaction(interaction : Interaction):
     return app_commands.Cooldown(1, 30.0)  
 
 
+def _command_solver(interaction : Interaction, cmd : Union[app_commands.Command, app_commands.Group]):
+    try:
+        if (binded_cmd := cmd.binding.app_command.default_permissions) is not None:
+            if isinstance(cmd, app_commands.Group):
+                command_solver(interaction, cmd)
+            elif isinstance(cmd, app_commands.Command):
+                channel_perm = interaction.channel.permissions_for(interaction.user)
+                return (binded_cmd.value & channel_perm.value) == binded_cmd.value
+        return True
+
+    except:
+        return True
+
+
+def _add_description(cmd : app_commands.Command):
+    if cmd.parameters:
+        temp = []
+        for parameter in cmd.parameters:
+            if parameter.required:
+                is_req = ' (Essential) '
+            else:
+                is_req = ' '
+            temp.append(f"*{is_req}`{parameter.display_name}` - {parameter.description}")
+        parameters = '\n'.join(temp)
+    else:
+        parameters = None
+        
+    permission = cmd.extras.get("permissions")
+    if permission:
+        permission = "* " + "\n* ".join(permission)
+
+    sequence = cmd.extras.get("sequence")
+
+    howto = cmd.extras.get("howto")
+    if howto:
+        howto = "\n".join(howto)
+    else:
+        howto = "* You would know how to do it!"
+    
+    if (
+        cmd.default_permissions and
+        cmd.default_permissions & interaction.channel.permissions_for(interaction.user) == cmd.default_permissions
+    ):
+        default_permission = cmd.default_permissions.__qualname__.replace('_', ' ').replace('guild', 'server').title()
+    else:
+        default_permission = None
+
+    detail = {
+        "default_permission" : default_permission,
+        "guild_only" : cmd.guild_only,
+        "parameters": parameters,
+        "permissions": permission,
+        "sequence": sequence,
+        "howto": howto,
+    }
+
+    command_usage = {
+        "name" : f"/{cmd.qualified_name}",
+        "description" : cmd.description,
+        "details" : CommandDetails(**detail)
+    }
+
+    return CommandUsageModel(**command_usage)
+
+
+def _configure_help(cogs : dict[str, commands.Cog], interaction : Interaction):
+    result : List[CommandUsageModel] = []
+    
+    for excluded, cog in cogs.items():
+        if excluded.lower() in exclude_cmds:
+            continue
+
+        for cmd in cog.walk_app_commands():
+            if cmd.name.lower() in exclude_cmds:
+                continue
+
+            if _command_solver(cmd):
+                result.append(_add_description(cmd))
+
+    result.sort(key=lambda c: c.name)
+    return result
+
+
 class CommandsTutorialSelect(ui.Select['TutorialView']):
     def __init__(self, cmds : List[CommandUsageModel]):
         super().__init__(
@@ -39,25 +122,19 @@ class CommandsTutorialSelect(ui.Select['TutorialView']):
             max_values=1,
         )
         
+        commands_item = {}
+
         for cmd in cmds:
+            cmd_name = cmd.name[1:]
             self.add_option(
-                label=cmd.name[1:],
+                label=cmd_name,
                 description=cmd.description
             )
-        self.cmds = cmds
-
-    async def callback(self, interaction : Interaction):
-        cmd_name = self.values[0]
-        target = None
-        for cmd in self.cmds:
-            if cmd_name == cmd.name[1:]:
-                target = cmd
-                break
+            commands_item[cmd_name] = cmd
         
-        assert target is not None
-        num = 1
+        self.commands_item = commands_item
 
-        details = target.details
+    def get_embed(self, details : CommandDetails):
         if details.guild_only:
             guild = "\n### This command doesn't work at DM."
             colour = 0xA064FF
@@ -70,12 +147,13 @@ class CommandsTutorialSelect(ui.Select['TutorialView']):
             description=f'{target.description}{guild}',
             colour=colour
         )
-        
+
         if params := details.parameters:
             if details.sequence:
                 sequence = f"\n**(2) Search Sequence**\n* {details.sequence}"
             else:
                 sequence = ""
+
             embed.add_field(
                 name=f"{num}. Parameter",
                 value=f"**(1) List**\n{params}{sequence}",
@@ -89,29 +167,37 @@ class CommandsTutorialSelect(ui.Select['TutorialView']):
             inline=False
         )
         num += 1
-        
+
         if details.permissions:
             embed.add_field(
                 name=f"{num}. I require Permission(s)",
                 value=f"{details.permissions}",
             )
             num += 1
-    
+
         if details.default_permission:
             embed.add_field(
                 name=f"{num}. You need Permission(s)",
                 value=f"{details.default_permission}"
             )
-        
+
         embed.set_footer(text="Try again please if any command doesn't run properly.")
+        return embed
+    
+    async def callback(self, interaction : Interaction):
+        target = self.commands_item.get(self.values[0], None)
+        assert target is not None
+
+        num = 1
+        embed = self.get_embed(target.details)
         
         try:
             await interaction.response.edit_message(content=None, embed=embed)
         
-        except:
+        except Exception:
             await interaction.response.defer(thinking=True, ephemeral=True)
             await asyncio.sleep(5)
-            await interaction.followup.send(content=None, embed=embed, ephemeral=True)
+            await interaction.followup.send(content="Unexpected Error Occured. Please try again.", ephemeral=True)
 
 
 class TutorialView(ui.View):
@@ -124,11 +210,9 @@ class TutorialView(ui.View):
         self.add_item(CommandsTutorialSelect(cmds))
 
     async def on_timeout(self) -> None:
-        self.clear_items()
-        self.stop()
         if self.message:
             try:
-                await self.message.delete()
+                await self.message.edit(view=None)
             except:
                 pass
             
@@ -140,92 +224,18 @@ class Utils(commands.Cog):
     @property
     def logger(self):
         return self.app.logger
-
-    async def configure_help(self, interaction : Interaction) :
-        def command_solver(cmd : Union[app_commands.Command, app_commands.Group]):
-            try:
-                if (binded_cmd := cmd.binding.app_command.default_permissions) is not None:
-                    if isinstance(cmd, app_commands.Group):
-                        command_solver(cmd)
-                    elif isinstance(cmd, app_commands.Command):
-                        channel_perm = interaction.channel.permissions_for(interaction.user)
-                        return (binded_cmd.value & channel_perm.value) == binded_cmd.value
-                return True
-
-            except:
-                return True
-
-        async def add_description(cmd : app_commands.Command):
-            if cmd.parameters:
-                temp = []
-                for parameter in cmd.parameters:
-                    if parameter.required:
-                        is_req = ' (Essential) '
-                    else:
-                        is_req = ' '
-                    temp.append(f"*{is_req}`{parameter.display_name}` - {parameter.description}")
-                parameters = '\n'.join(s for s in temp)
-                del temp
-            else:
-                parameters = None
-                
-            permission = cmd.extras.get("permissions")
-            if permission:
-                permission = "* " + "\n* ".join(permission)
-
-            sequence = cmd.extras.get("sequence")
-
-            howto = cmd.extras.get("howto")
-            if howto is not None:
-                howto = "\n".join(howto)
-            else:
-                howto = "* You would know how to do it!"
-            
-            if cmd.default_permissions and cmd.default_permissions & interaction.channel.permissions_for(interaction.user) == cmd.default_permissions:
-                default_permission = cmd.default_permissions.__qualname__.replace('_', ' ').replace('guild', 'server').title()
-            else:
-                default_permission = None
-
-            detail = {
-                "default_permission" : default_permission,
-                "guild_only" : cmd.guild_only,
-                "parameters": parameters,
-                "permissions": permission,
-                "sequence": sequence,
-                "howto": howto,
-            }
-
-            command_usage = {
-                "name" : f"/{cmd.qualified_name}",
-                "description" : cmd.description,
-                "details" : CommandDetails(**detail)
-            }
-
-            result.append(CommandUsageModel(**command_usage))
-            
-        result : List[CommandUsageModel] = []
-        
-        async with (asyncio.TaskGroup() as tg):
-            for excluded, cog in self.app.cogs.items():
-                if excluded.lower() in exclude_cmds:
-                    continue
-
-                for cmd in cog.walk_app_commands():
-                    if cmd.name.lower() in exclude_cmds:
-                        continue
-
-                    if command_solver(cmd):
-                        tg.create_task(add_description(cmd))
-
-        return sorted(result, key=lambda c: c.name)
-
+    
     @app_commands.command(name="help", description="You can know how to enjoy AL9oo!")
     @app_commands.guild_only()
     async def help(self, interaction : Interaction):
         try:
             await interaction.response.defer(thinking=True, ephemeral=True)
 
-            helps = await self.configure_help(interaction)
+            helps = await self.app.loop.run_in_executor(
+                None, _configure_help,
+                self.app.cogs, interaction
+            )
+
             view = TutorialView(helps)
             embed = Embed(
                 title="Please Choose command",
@@ -234,8 +244,7 @@ class Utils(commands.Cog):
             )
 
             view.message = await interaction.edit_original_response(content=None, view=view, embed=embed)
-            await view.wait()
-            
+
         except Exception as e:
             await interaction.edit_original_response(content=e)
             self.logger.error(e, exc_info=e)
@@ -259,7 +268,7 @@ class Utils(commands.Cog):
         perm.manage_webhooks = True
         perm.attach_files = True
         perm.embed_links = True
-        
+
         reasons = {
             "Message" : {
                 "Embed links" : "Basically Lots of messages I sent are consist of Embeds!",
@@ -289,7 +298,7 @@ class Utils(commands.Cog):
             )
             embed.description += '\n'.join(sub_value) + '\n'
         await interaction.followup.send(view=view, embed=embed)
-        
+
     @app_commands.command(description='Get support server link!')
     @app_commands.checks.dynamic_cooldown(check_interaction, key=lambda i : i.user.id)
     async def support(self, interaction : Interaction):
@@ -325,9 +334,10 @@ class Utils(commands.Cog):
             embed.add_field(name="1. Birthday", value=birthday, inline=False)
             embed.add_field(name='2. Uptime', value=uptime_msg, inline=True)
             embed.add_field(name="3. Representive Color", value="#59E298, #8BB8E1", inline=True)
+
             view = InviteLinkView(label="Go to Server", url='https://discord.gg/8dpAFYXk8s')
             await interaction.followup.send(embed=embed, view=view)
-        
+
         except:     
             await asyncio.sleep(5)
             await interaction.edit_original_response(content="Oops! There was / were error(s)! Please try again later.")
@@ -336,10 +346,10 @@ class Utils(commands.Cog):
     @app_commands.checks.dynamic_cooldown(check_interaction, key=lambda i : i.user.id)
     async def ping(self, interaction : Interaction):
         start = time.perf_counter()
-       
+        description = []
+
         await interaction.response.defer(thinking=True, ephemeral=True)
 
-        description = []
         if interaction.guild is not None:
             shard_id = interaction.guild.shard_id
             shard = self.app.get_shard(shard_id)
@@ -350,7 +360,6 @@ class Utils(commands.Cog):
 
         end = time.perf_counter()
         duration = int((end - start) * 1000)
-        description.append(f"* Actual Ping : {duration}ms")
 
         embed = Embed(
             title='Pong!',
