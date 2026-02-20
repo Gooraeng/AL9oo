@@ -1,5 +1,11 @@
-# Global Ignore Files
+# Global .gitignore
+
+## Environment variables
 .env
 
-# Temporary files
+## IDEs
+.vscode
+.idea
+
+## Temporary files
 .gitignore.swp
