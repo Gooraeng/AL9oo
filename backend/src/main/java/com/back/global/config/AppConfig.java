@@ -3,11 +3,14 @@ package com.back.global.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class AppConfig {
 
     private static Environment environment;
@@ -18,15 +21,15 @@ public class AppConfig {
     }
 
     public static boolean isProd() {
-        return environment.matchesProfiles("prod");
+        return environment != null && environment.matchesProfiles("prod");
     }
 
     public static boolean isDev() {
-        return environment.matchesProfiles("dev");
+        return environment != null && environment.matchesProfiles("dev");
     }
 
     public static boolean isTest() {
-        return environment.matchesProfiles("test");
+        return environment != null && environment.matchesProfiles("test");
     }
 
     @Bean

@@ -42,7 +42,7 @@ public class MemberService {
     public NickNameCheckResultResponseDto checkDisplayNameDuplication(@NotNull String displayName) {
         boolean result = memberRepository.existsMemberByDisplayName(displayName);
 
-        return new NickNameCheckResultResponseDto(result);
+        return new NickNameCheckResultResponseDto(!result);
     }
 
     public Optional<Member> findByIdWithAuthAccounts(Long memberId) {
