@@ -37,6 +37,7 @@
 AL9oo/
 ├── backend/    # Spring Boot REST API
 ├── discord/    # Discord Bot (Python)
+├── docs/       # Project Detail Docs
 ├── frontend/   # Next.js Web UI
 └── infra/      # Terraform Based Infrastructure Management
 ```
