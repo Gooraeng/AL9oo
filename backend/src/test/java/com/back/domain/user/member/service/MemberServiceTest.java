@@ -173,8 +173,8 @@ class MemberServiceTest {
     class CheckDisplayNameDuplicationTests {
 
         @Test
-        @DisplayName("중복 있음 - existsMemberByDisplayName()이 true 반환 시 available=true 반환")
-        void duplicate_exists_returns_available_true() {
+        @DisplayName("중복 있음 - existsMemberByDisplayName()이 true 반환 시 available=false 반환")
+        void duplicate_exists_returns_available_false() {
             // Given
             given(memberRepository.existsMemberByDisplayName("takenName")).willReturn(true);
 
@@ -183,13 +183,13 @@ class MemberServiceTest {
 
             // Then
             assertThat(result).isNotNull();
-            assertThat(result.available()).isTrue();
+            assertThat(result.available()).isFalse();
             verify(memberRepository).existsMemberByDisplayName("takenName");
         }
 
         @Test
-        @DisplayName("중복 없음 - existsMemberByDisplayName()이 false 반환 시 available=false 반환")
-        void no_duplicate_returns_available_false() {
+        @DisplayName("중복 없음 - existsMemberByDisplayName()이 false 반환 시 available=true 반환")
+        void no_duplicate_returns_available_true() {
             // Given
             given(memberRepository.existsMemberByDisplayName("freeName")).willReturn(false);
 
@@ -198,7 +198,7 @@ class MemberServiceTest {
 
             // Then
             assertThat(result).isNotNull();
-            assertThat(result.available()).isFalse();
+            assertThat(result.available()).isTrue();
             verify(memberRepository).existsMemberByDisplayName("freeName");
         }
     }
