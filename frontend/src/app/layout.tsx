@@ -16,7 +16,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AL9oo",
-  description: "References for Racing Master",
+  description: "Reference Hub for Racing Master",
+  icons: {
+    icon: [
+      { url: "logo/favicon.ico", sizes: "any"},
+      { url: "logo/32x32.png", sizes: "32x16", type: "image/png" },
+      { url: "logo/32x32.png", sizes: "32x32", type: "image/png" }
+    ],
+    apple: [{ url: "logo/apple-icon.png", type: "image/png"}]
+  }
 };
 
 export default function RootLayout({
