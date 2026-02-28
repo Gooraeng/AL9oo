@@ -1,0 +1,17 @@
+<svg
+  class="w-full h-full"
+  fill="none"
+  stroke="#6A5CFB"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  stroke-width="2.5"
+  viewBox="0 0 24 24"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g transform="translate(12, 12) scale(0.8) translate(-12, -12)">
+    <path d="M11 20a9 9 0 1 0 0-18 8 8 0 0 0 0 18z" />
+    <path d="M21 21l-3.35-3.35" />
+    <path d="M6.5 11a4.5 4.5 0 0 1 9 0" stroke-width="2" />
+    <path d="M11 11l2-3" stroke-width="2" />
+  </g>
+</svg>
