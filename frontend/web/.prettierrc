@@ -19,10 +19,11 @@
   "importOrder": [
     "^next-(.*)$",
     "^next/(.*)$",
-    "^@/lib/backend/client",
     "^@/lib/(.*)$",
-    "^@/components/ui/(.*)$",
+    "^@/global/components/(.*)$",
+    "^@/global/shadcn/(.*)$",
     "^lucide-react$",
+    "^react-icons",
     "^[./]"
   ],
   "importOrderSeparation": true,
